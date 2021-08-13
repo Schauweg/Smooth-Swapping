@@ -13,6 +13,9 @@
   "entrypoints": {
     "client": [
       "schauweg.smoothswapping.SmoothSwapping"
+    ],
+    "modmenu": [
+      "schauweg.smoothswapping.modmenu.ModmenuIntegration"
     ]
   },
   "mixins": [

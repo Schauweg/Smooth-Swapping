@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import schauweg.smoothswapping.InventorySwap;
 import schauweg.smoothswapping.SmoothSwapping;
+import schauweg.smoothswapping.config.Config;
+import schauweg.smoothswapping.config.ConfigManager;
 
 import java.util.List;
 
@@ -123,7 +125,7 @@ public abstract class ItemRendererMixin {
     }
 
     private void renderSwap(InventorySwap swap, float delta, float lastFrameDuration, ItemStack stack, boolean leftHanded, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model) {
-
+        Config config = ConfigManager.getConfig();
         MatrixStack matrices = new MatrixStack();
         matrices.push();
 
@@ -137,7 +139,7 @@ public abstract class ItemRendererMixin {
         float lastUpdate = swap.getLastUpdate();
         if (lastUpdate != delta) {
 
-            double speed = swap.getDistance() / 10;
+            double speed = swap.getDistance() / 10 * config.getAnimationSpeedFormatted();
 
             swap.setX(x + lastFrameDuration * speed * Math.cos(angle));
             swap.setY(y + lastFrameDuration * speed * Math.sin(angle));
