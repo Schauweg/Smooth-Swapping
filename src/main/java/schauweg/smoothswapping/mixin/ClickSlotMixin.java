@@ -29,9 +29,16 @@ public class ClickSlotMixin {
 
     @Shadow @Final private int slot;
 
-    @Inject(method = "apply", at = @At("TAIL"))
-    public void onApply(CallbackInfo cbi) {
+    private void addInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked) {
+        List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
+        int oldToCount = SmoothSwapping.oldStacks.get(toSlot.id).getCount();
+        int newToCount = toSlot.getStack().getCount();
+        swaps.add(new InventorySwap(fromSlot, toSlot, checked, newToCount - oldToCount));
+        SmoothSwapping.swaps.put(index, swaps);
+    }
 
+    @Inject(method = "<init>(IIIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/item/ItemStack;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("TAIL"))
+    public void onInit(CallbackInfo cbi){
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove(slot);
 
@@ -58,14 +65,6 @@ public class ClickSlotMixin {
                 }
             }
         }
-    }
-
-    private void addInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked) {
-        List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
-        int oldToCount = SmoothSwapping.oldStacks.get(toSlot.id).getCount();
-        int newToCount = toSlot.getStack().getCount();
-        swaps.add(new InventorySwap(fromSlot, toSlot, checked, newToCount - oldToCount));
-        SmoothSwapping.swaps.put(index, swaps);
     }
 
 }

@@ -38,11 +38,10 @@ public abstract class ItemRendererMixin {
 
     @Inject(method = "renderItem(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;IILnet/minecraft/client/render/model/BakedModel;)V", at = @At("HEAD"), cancellable = true)
     public void onRenderItem(ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo cbi) {
+        if (zOffset < 100) return; //fix so hotbar won't be affected
+
         if (renderMode == ModelTransformation.Mode.GUI) {
             MinecraftClient client = MinecraftClient.getInstance();
-
-            //fix so hotbar won't be affected
-            if (zOffset < 100) return;
 
             if (client.player == null)
                 return;
@@ -63,7 +62,7 @@ public abstract class ItemRendererMixin {
                 for (int i = 0; i < swapList.size(); i++) {
                     InventorySwap swap = swapList.get(i);
 
-                    if (!swap.isChecked() && SmoothSwapping.oldStacks.get(index).getItem() == stack.getItem()) {
+                    if (!swap.isChecked() && ItemStack.areEqual(SmoothSwapping.oldStacks.get(index), stack)) {
                         swap.setChecked(true);
                         swap.setRenderToSlot(true);
                     } else if (!swap.isChecked()) {
@@ -99,7 +98,7 @@ public abstract class ItemRendererMixin {
 
     @Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
     private void onRenderOverlay(TextRenderer renderer, ItemStack stack, int x, int y, @Nullable String countLabel, CallbackInfo cbi) {
-        if (zOffset < 100) return;
+        if (zOffset < 100) return; //fix so hotbar won't be affected
 
         int index = getSlotIndex(stack);
         if (SmoothSwapping.swaps.containsKey(index)) {
