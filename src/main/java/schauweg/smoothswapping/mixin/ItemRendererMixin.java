@@ -62,7 +62,7 @@ public abstract class ItemRendererMixin {
                 for (int i = 0; i < swapList.size(); i++) {
                     InventorySwap swap = swapList.get(i);
 
-                    if (!swap.isChecked() && ItemStack.areEqual(SmoothSwapping.oldStacks.get(index), stack)) {
+                    if (!swap.isChecked() && ItemStack.areItemsEqual(SmoothSwapping.oldStacks.get(index), stack)) {
                         swap.setChecked(true);
                         swap.setRenderToSlot(true);
                     } else if (!swap.isChecked()) {
