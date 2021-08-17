@@ -41,8 +41,8 @@ public class ClickSlotMixin {
     public void onInit(CallbackInfo cbi){
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove(slot);
-
         if ((actionType == SlotActionType.QUICK_MOVE || actionType == SlotActionType.SWAP) && modifiedStacks.size() > 1) {
+            assert MinecraftClient.getInstance().player != null;
             ScreenHandler screenHandler = MinecraftClient.getInstance().player.currentScreenHandler;
             Slot fromSlot = screenHandler.getSlot(slot);
             if (actionType == SlotActionType.QUICK_MOVE) {

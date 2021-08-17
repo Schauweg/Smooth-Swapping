@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "smoothswapping",
   "version": "${version}",
-
   "name": "Smooth Swapping",
   "description": "Moves the items in an inventory smoothly instead of instantly",
   "authors": [
@@ -21,7 +20,11 @@
   "mixins": [
     "smoothswapping.mixins.json"
   ],
-
+  "contact": {
+    "sources": "https://github.com/Schauweg/Smooth-Swapping",
+    "issues": "https://github.com/Schauweg/Smooth-Swapping/issues"
+  },
+  "license": "GPL-3.0",
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
