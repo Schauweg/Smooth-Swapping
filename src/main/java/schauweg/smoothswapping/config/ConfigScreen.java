@@ -8,7 +8,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 public class ConfigScreen {

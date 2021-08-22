@@ -132,26 +132,10 @@ public abstract class ItemRendererMixin {
         float angle = swap.getAngle();
 
         matrices.translate(-x / 16, y / 16, 0);
+
         itemRenderer.renderItem(stack, ModelTransformation.Mode.GUI, leftHanded, matrices, vertexConsumers, light, overlay, model);
 
-        float ease = 1f;
-
-        String easeMode = config.getEaseMode();
-
-        if (!easeMode.equals("linear")) {
-            float map = SwapUtil.map((float) Math.hypot(x, y), 0, (float) swap.getDistance(), 0.95f, 0.05f);
-            switch (config.getEaseMode()) {
-                case "ease-in" -> {
-                    map = map - 1;
-                }
-                case "ease-out" -> {
-                }
-                case "ease-in-out" -> {
-                    map = map >= 0.5f ? 1f - map : map;
-                }
-            }
-            ease = SwapUtil.bezierBlend(map) * config.getEaseSpeedFormatted();
-        }
+        float ease = SwapUtil.getEase(config, x, y, swap.getDistance());
 
         double speed = swap.getDistance() / 10 * ease * config.getAnimationSpeedFormatted();
 

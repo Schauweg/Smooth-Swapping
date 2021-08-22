@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
+import schauweg.smoothswapping.config.Config;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class SwapUtil {
     }
 
     public static int getSlotIndex(ItemStack stack) {
+        if (MinecraftClient.getInstance().player == null) return -1;
         ScreenHandler handler = MinecraftClient.getInstance().player.currentScreenHandler;
         DefaultedList<ItemStack> stacks = handler.getStacks();
         return stacks.indexOf(stack);
@@ -41,21 +43,24 @@ public class SwapUtil {
         return (int) (Math.floor(2 * angle / PI) % 4 + 4) % 4;
     }
 
-    public static float easeInOut(float time, float startValue, float change, float duration) {
-        time /= duration / 2;
-        if (time < 1) {
-            return change / 2 * time * time + startValue;
-        }
-
-        time--;
-        return -change / 2 * (time * (time - 2) - 1) + startValue;
-    }
-
     public static float bezierBlend(float t) {
         return t * t * (3.0f - 2.0f * t);
     }
 
     public static float map(float in, float inMin, float inMax, float outMax, float outMin) {
         return (in - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
+    }
+
+    public static float getEase(Config config, double x, double y, double distance){
+
+        float progress = map((float) Math.hypot(x, y), 0, (float) distance, 0.95f, 0.05f);
+
+            switch (config.getEaseMode()) {
+                case "linear" -> progress = 1f;
+                case "ease-in" -> progress = progress - 1;
+                case "ease-in-out" -> progress = progress >= 0.5f ? 1f - progress : progress;
+                //for "ease-out" do nothing
+            }
+        return SwapUtil.bezierBlend(progress) * config.getEaseSpeedFormatted();
     }
 }
