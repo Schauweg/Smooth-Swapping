@@ -2,6 +2,7 @@ package schauweg.smoothswapping.mixin;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.ScreenHandler;
@@ -41,7 +42,7 @@ public class ClickSlotMixin {
     public void onInit(CallbackInfo cbi){
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove(slot);
-        if ((actionType == SlotActionType.QUICK_MOVE || actionType == SlotActionType.SWAP) && modifiedStacks.size() > 1) {
+        if ((actionType == SlotActionType.QUICK_MOVE || actionType == SlotActionType.SWAP) && modifiedStacks.size() > 1 && MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
             assert MinecraftClient.getInstance().player != null;
             ScreenHandler screenHandler = MinecraftClient.getInstance().player.currentScreenHandler;
             Slot fromSlot = screenHandler.getSlot(slot);
