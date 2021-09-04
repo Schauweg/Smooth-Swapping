@@ -131,7 +131,9 @@ public abstract class ItemRendererMixin {
         double y = swap.getY();
         float angle = swap.getAngle();
 
-        matrices.translate(-x / 16, y / 16, 0);
+        float progress = SwapUtil.map((float) Math.hypot(x, y), 0, (float) swap.getDistance(), 0.95f, 0.05f);
+
+        matrices.translate(-x / 16, y / 16, 32);
 
         itemRenderer.renderItem(stack, ModelTransformation.Mode.GUI, leftHanded, matrices, vertexConsumers, light, overlay, model);
 
