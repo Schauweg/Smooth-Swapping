@@ -51,10 +51,7 @@ public class SwapUtil {
         return (in - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
     }
 
-    public static float getEase(Config config, double x, double y, double distance){
-
-        float progress = map((float) Math.hypot(x, y), 0, (float) distance, 0.95f, 0.05f);
-
+    public static float getEase(Config config, float progress){
             switch (config.getEaseMode()) {
                 case "linear" -> progress = 1f;
                 case "ease-in" -> progress = progress - 1;

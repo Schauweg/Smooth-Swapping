@@ -46,6 +46,7 @@ public class ClickSlotMixin {
             assert MinecraftClient.getInstance().player != null;
             ScreenHandler screenHandler = MinecraftClient.getInstance().player.currentScreenHandler;
             Slot fromSlot = screenHandler.getSlot(slot);
+            System.out.println(modifiedStacks);
             if (actionType == SlotActionType.QUICK_MOVE) {
                 for (Map.Entry<Integer, ItemStack> stackEntry : modifiedStacks.int2ObjectEntrySet()) {
                     if (stackEntry.getKey() != slot) {

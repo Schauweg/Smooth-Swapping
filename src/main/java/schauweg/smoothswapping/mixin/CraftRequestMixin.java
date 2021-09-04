@@ -1,15 +1,12 @@
 package schauweg.smoothswapping.mixin;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CraftRequestC2SPacket;
 import net.minecraft.recipe.Recipe;
-import net.minecraft.util.collection.DefaultedList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import schauweg.smoothswapping.SmoothSwapping;
 
 @Mixin(CraftRequestC2SPacket.class)
 public class CraftRequestMixin {
@@ -21,8 +18,9 @@ public class CraftRequestMixin {
 
         if (client.player == null) return;
 
-        //TODO add swap when clicked on crafting book recipe
 
+//        System.out.println("Craft Request " + " " + craftAll);
+        
     }
 
 }

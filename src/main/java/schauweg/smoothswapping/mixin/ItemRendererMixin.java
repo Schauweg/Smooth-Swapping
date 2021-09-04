@@ -41,7 +41,7 @@ public abstract class ItemRendererMixin {
             if (client.player == null)
                 return;
 
-            doSwap(client, (ItemRenderer) (Object) this, stack, renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model, cbi);
+            doSwap(client, stack, renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model, cbi);
         }
     }
 
@@ -52,10 +52,10 @@ public abstract class ItemRendererMixin {
         doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, cbi);
     }
 
-    private void doSwap(MinecraftClient client, ItemRenderer itemRenderer, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo cbi) {
+    private void doSwap(MinecraftClient client, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo cbi) {
 
         float lastFrameDuration = client.getLastFrameDuration();
-
+        ItemRenderer renderer = client.getItemRenderer();
         int index = getSlotIndex(stack);
 
         if (SmoothSwapping.swaps.containsKey(index)) {
@@ -80,7 +80,7 @@ public abstract class ItemRendererMixin {
                 }
 
                 //render swap
-                renderSwap(itemRenderer, swap, lastFrameDuration, stack.copy(), leftHanded, vertexConsumers, light, overlay, model);
+                renderSwap(renderer, swap, lastFrameDuration, stack.copy(), leftHanded, vertexConsumers, light, overlay, model);
 
 
                 if (hasArrived(swap)) {
@@ -91,7 +91,7 @@ public abstract class ItemRendererMixin {
             }
 
             if (renderToSlot)
-                itemRenderer.renderItem(stack.copy(), renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model);
+                renderer.renderItem(stack.copy(), renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model);
 
             if (swapList.size() == 0)
                 SmoothSwapping.swaps.remove(index);
@@ -135,7 +135,7 @@ public abstract class ItemRendererMixin {
 
         itemRenderer.renderItem(stack, ModelTransformation.Mode.GUI, leftHanded, matrices, vertexConsumers, light, overlay, model);
 
-        float ease = SwapUtil.getEase(config, x, y, swap.getDistance());
+        float ease = SwapUtil.getEase(config, progress);
 
         double speed = swap.getDistance() / 10 * ease * config.getAnimationSpeedFormatted();
 

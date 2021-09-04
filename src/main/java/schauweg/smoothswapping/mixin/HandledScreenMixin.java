@@ -36,6 +36,8 @@ public class HandledScreenMixin {
 
         if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)){
             addAll(SmoothSwapping.oldStacks, stacks);
+//            System.out.println("Changed");
+//            System.out.println("------------------------");
         }
     }
 
