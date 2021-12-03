@@ -27,7 +27,7 @@ public class Config {
     }
 
     public float getEaseSpeedFormatted() {
-        return animationSpeed / 100F;
+        return easeSpeed / 100F;
     }
 
     public String getEaseMode() {
