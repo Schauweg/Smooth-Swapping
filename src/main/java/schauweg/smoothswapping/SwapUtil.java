@@ -35,7 +35,7 @@ public class SwapUtil {
 
     public static void setRenderToTrue(List<InventorySwap> swapList) {
         for (InventorySwap swap : swapList) {
-            swap.setRenderToSlot(true);
+            swap.setRenderDestinationSlot(true);
         }
     }
 

@@ -8,8 +8,7 @@ public class InventorySwap {
     private double x;
     private double y;
     private final double distance;
-    private float lastUpdate;
-    private boolean renderToSlot;
+    private boolean renderDestinationSlot;
     private boolean checked;
     private final int amount;
 
@@ -18,8 +17,7 @@ public class InventorySwap {
         this.y = toSlot.y - fromSlot.y;
         this.angle = (float) (Math.atan2(y, x) + Math.PI);
         this.distance = Math.hypot(x, y);
-        this.lastUpdate = -999;
-        this.renderToSlot = false;
+        this.renderDestinationSlot = false;
         this.checked = checked;
         this.amount = amount;
     }
@@ -48,20 +46,12 @@ public class InventorySwap {
         return distance;
     }
 
-    public float getLastUpdate() {
-        return lastUpdate;
+    public boolean renderDestinationSlot() {
+        return renderDestinationSlot;
     }
 
-    public void setLastUpdate(float lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public boolean isRenderToSlot() {
-        return renderToSlot;
-    }
-
-    public void setRenderToSlot(boolean renderToSlot) {
-        this.renderToSlot = renderToSlot;
+    public void setRenderDestinationSlot(boolean renderDestinationSlot) {
+        this.renderDestinationSlot = renderDestinationSlot;
     }
 
     public boolean isChecked() {

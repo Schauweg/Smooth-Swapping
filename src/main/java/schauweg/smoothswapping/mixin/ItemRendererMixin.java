@@ -2,17 +2,19 @@ package schauweg.smoothswapping.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import schauweg.smoothswapping.InventorySwap;
 import schauweg.smoothswapping.SmoothSwapping;
@@ -41,18 +43,18 @@ public abstract class ItemRendererMixin {
             if (client.player == null)
                 return;
 
-            doSwap(client, stack, renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model, cbi);
+            doSwap(client, stack, renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model, zOffset, cbi);
         }
     }
 
-    @Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
-    private void onRenderOverlay(TextRenderer renderer, ItemStack stack, int x, int y, @Nullable String countLabel, CallbackInfo cbi) {
+    @Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At(value = "HEAD"), cancellable = true)
+    private void onRenderOverlay(TextRenderer renderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo ci) {
         if (zOffset < 100) return; //fix so hotbar won't be affected
 
-        doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, cbi);
+        doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, ci);
     }
 
-    private void doSwap(MinecraftClient client, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, CallbackInfo cbi) {
+    private void doSwap(MinecraftClient client, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, float zOffset, CallbackInfo ci) {
 
         float lastFrameDuration = client.getLastFrameDuration();
         ItemRenderer renderer = client.getItemRenderer();
@@ -62,7 +64,7 @@ public abstract class ItemRendererMixin {
             //Get all swaps for one slot
             List<InventorySwap> swapList = SmoothSwapping.swaps.get(index);
 
-            boolean renderToSlot = true;
+            boolean renderDestinationSlot = true;
 
             //render all swaps for one slot
             for (int i = 0; i < swapList.size(); i++) {
@@ -70,18 +72,18 @@ public abstract class ItemRendererMixin {
 
                 if (!swap.isChecked() && ItemStack.areItemsEqual(SmoothSwapping.oldStacks.get(index), stack)) {
                     swap.setChecked(true);
-                    swap.setRenderToSlot(true);
+                    swap.setRenderDestinationSlot(true);
                 } else if (!swap.isChecked()) {
                     swap.setChecked(true);
                 }
 
-                if (!swap.isRenderToSlot()) {
-                    renderToSlot = false;
+
+                if (!swap.renderDestinationSlot()) {
+                    renderDestinationSlot = false;
                 }
 
                 //render swap
-                renderSwap(renderer, swap, lastFrameDuration, stack.copy(), leftHanded, vertexConsumers, light, overlay, model);
-
+                renderSwap(renderer, swap, lastFrameDuration, stack.copy(), leftHanded, vertexConsumers, light, overlay, model, zOffset);
 
                 if (hasArrived(swap)) {
                     setRenderToTrue(swapList);
@@ -90,13 +92,14 @@ public abstract class ItemRendererMixin {
 
             }
 
-            if (renderToSlot)
+            //whether the destination slot should be rendered
+            if (renderDestinationSlot) {
                 renderer.renderItem(stack.copy(), renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model);
-
+            }
             if (swapList.size() == 0)
                 SmoothSwapping.swaps.remove(index);
 
-            cbi.cancel();
+            ci.cancel();
         }
     }
 
@@ -109,20 +112,32 @@ public abstract class ItemRendererMixin {
 
             for (InventorySwap swap : swapList) {
                 stackCount -= swap.getAmount();
-                if (!swap.isRenderToSlot()) {
+                if (!swap.renderDestinationSlot()) {
                     renderToSlot = false;
                 }
+
+                if (swap.getAmount() > 1) {
+                    String amount = String.valueOf(swap.getAmount());
+                    VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+
+                    MatrixStack textStack = new MatrixStack();
+                    textStack.push();
+                    textStack.translate(-swap.getX(), -swap.getY(), zOffset + 250);
+                    renderer.draw(amount, (float) (x + 19 - 2 - renderer.getWidth(amount)), (float) (y + 6 + 3), 16777215, true, textStack.peek().getModel(), immediate, false, 0, 15728880);
+                    immediate.draw();
+                    textStack.pop();
+                }
+
             }
 
             if (renderToSlot && stackCount > 1) {
                 itemRenderer.renderGuiItemOverlay(renderer, stack.copy(), x, y, String.valueOf(stackCount));
             }
-
             cbi.cancel();
         }
     }
 
-    private static void renderSwap(ItemRenderer itemRenderer, InventorySwap swap, float lastFrameDuration, ItemStack stack, boolean leftHanded, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model) {
+    private static void renderSwap(ItemRenderer itemRenderer, InventorySwap swap, float lastFrameDuration, ItemStack stack, boolean leftHanded, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, float zOffset) {
         Config config = ConfigManager.getConfig();
         MatrixStack matrices = new MatrixStack();
         matrices.push();
@@ -133,7 +148,7 @@ public abstract class ItemRendererMixin {
 
         float progress = SwapUtil.map((float) Math.hypot(x, y), 0, (float) swap.getDistance(), 0.95f, 0.05f);
 
-        matrices.translate(-x / 16, y / 16, 32);
+        matrices.translate(-x / 16, y / 16, zOffset - 145); //zOffset 5
 
         itemRenderer.renderItem(stack, ModelTransformation.Mode.GUI, leftHanded, matrices, vertexConsumers, light, overlay, model);
 
