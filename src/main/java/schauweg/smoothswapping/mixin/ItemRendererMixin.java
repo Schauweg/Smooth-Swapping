@@ -13,8 +13,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import schauweg.smoothswapping.InventorySwap;
 import schauweg.smoothswapping.SmoothSwapping;
@@ -123,7 +121,7 @@ public abstract class ItemRendererMixin {
                     MatrixStack textStack = new MatrixStack();
                     textStack.push();
                     textStack.translate(-swap.getX(), -swap.getY(), zOffset + 250);
-                    renderer.draw(amount, (float) (x + 19 - 2 - renderer.getWidth(amount)), (float) (y + 6 + 3), 16777215, true, textStack.peek().getModel(), immediate, false, 0, 15728880);
+                    renderer.draw(amount, (float) (x + 19 - 2 - renderer.getWidth(amount)), (float) (y + 6 + 3), 16777215, true, textStack.peek().getPositionMatrix(), immediate, false, 0, 15728880);
                     immediate.draw();
                     textStack.pop();
                 }

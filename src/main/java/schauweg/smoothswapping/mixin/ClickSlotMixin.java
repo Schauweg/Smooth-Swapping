@@ -43,12 +43,11 @@ public class ClickSlotMixin {
 
         if ((actionType == SlotActionType.QUICK_MOVE || actionType == SlotActionType.SWAP) && modifiedStacks.size() > 1 && MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
             assert MinecraftClient.getInstance().player != null;
+
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             ScreenHandler screenHandler = player.currentScreenHandler;
-
-            System.out.println(modifiedStacks);
-
             Slot mouseSlot = screenHandler.getSlot(slot);
+
             if (actionType == SlotActionType.QUICK_MOVE) {
                 for (Map.Entry<Integer, ItemStack> stackEntry : modifiedStacks.int2ObjectEntrySet()) {
                     int destinationSlotID = stackEntry.getKey();
