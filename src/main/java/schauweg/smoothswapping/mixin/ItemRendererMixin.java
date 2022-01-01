@@ -102,7 +102,7 @@ public abstract class ItemRendererMixin {
 				ci.cancel();
 			}
 		} catch (StackOverflowError e) {
-			e.printStackTrace();
+			SmoothSwapping.LOGGER.warn("StackOverflowError just happened. This message is a reminder to properly fix an issue #4 described on SmoothSwapping's GitHub");
 			SmoothSwapping.swaps.remove(index);
 		}
 	}
@@ -143,7 +143,7 @@ public abstract class ItemRendererMixin {
                 cbi.cancel();
             }
         } catch (StackOverflowError e) {
-			e.printStackTrace();
+			SmoothSwapping.LOGGER.warn("StackOverflowError just happened. This message is a reminder to properly fix an issue #4 described on SmoothSwapping's GitHub");
             SmoothSwapping.swaps.remove(index);
         }
 	}
