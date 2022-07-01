@@ -12,13 +12,14 @@ import net.minecraft.util.collection.DefaultedList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import schauweg.smoothswapping.config.ConfigManager;
+import schauweg.smoothswapping.swaps.InventorySwap;
 
 public class SmoothSwapping implements ClientModInitializer {
 
     public static final String MOD_ID = "smoothswapping";
     public static final Gson GSON = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).setPrettyPrinting().create();
     
-    public static final Logger LOGGER = LogManager.getLogger("smoothswapping");
+    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     
     public static Map<Integer, List<InventorySwap>> swaps;
     public static DefaultedList<ItemStack> oldStacks;

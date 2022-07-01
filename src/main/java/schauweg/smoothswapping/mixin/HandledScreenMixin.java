@@ -12,6 +12,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import schauweg.smoothswapping.SmoothSwapping;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Mixin(HandledScreen.class)
 public class HandledScreenMixin {
 
@@ -34,11 +39,33 @@ public class HandledScreenMixin {
             currentScreen = screen;
         }
 
+//        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, stacks);
+//
+//        if (changedStacks.size() > 0){
+//
+//
+//
+//            addAll(SmoothSwapping.oldStacks, stacks);
+//        }
+
         if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)){
             addAll(SmoothSwapping.oldStacks, stacks);
-//            System.out.println("Changed");
-//            System.out.println("------------------------");
         }
+    }
+
+    private Map<Integer, ItemStack> getChangedStacks(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
+        Map<Integer, ItemStack> changedStacks = new HashMap<>();
+        for (int slotID = 0; slotID < oldStacks.size(); slotID++) {
+            ItemStack newStack = newStacks.get(slotID);
+            ItemStack oldStack = oldStacks.get(slotID);
+            if (!ItemStack.areEqual(oldStack, newStack)) {
+
+
+
+                changedStacks.put(slotID, newStack.copy());
+            }
+        }
+        return changedStacks;
     }
 
     private boolean areStacksEqual(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {

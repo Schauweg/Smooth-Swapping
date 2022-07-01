@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import schauweg.smoothswapping.InventorySwap;
+import schauweg.smoothswapping.swaps.InventorySwap;
 import schauweg.smoothswapping.SmoothSwapping;
 
 import java.util.*;
@@ -29,12 +29,6 @@ public class ClickSlotMixin {
 
     //id of slot that got clicked/hovered over
     @Shadow @Final private int slot;
-
-    private void addInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked, int amount) {
-        List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
-        swaps.add(new InventorySwap(fromSlot, toSlot, checked, amount));
-        SmoothSwapping.swaps.put(index, swaps);
-    }
 
     @Inject(method = "<init>(IIIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/item/ItemStack;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("TAIL"))
     public void onInit(CallbackInfo cbi){
@@ -84,6 +78,12 @@ public class ClickSlotMixin {
                 }
             }
         }
+    }
+
+    private void addInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked, int amount) {
+        List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
+        swaps.add(new InventorySwap(fromSlot, toSlot, checked, amount));
+        SmoothSwapping.swaps.put(index, swaps);
     }
 
 }

@@ -1,4 +1,4 @@
-package schauweg.smoothswapping;
+package schauweg.smoothswapping.swaps;
 
 import net.minecraft.screen.slot.Slot;
 

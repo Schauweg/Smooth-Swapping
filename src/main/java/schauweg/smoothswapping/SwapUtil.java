@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
 import schauweg.smoothswapping.config.Config;
+import schauweg.smoothswapping.swaps.InventorySwap;
 
 import java.util.List;
 
