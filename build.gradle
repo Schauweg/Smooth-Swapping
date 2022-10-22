@@ -1,14 +1,19 @@
 plugins {
-	id 'fabric-loom' version '0.12-SNAPSHOT'
+	id 'fabric-loom' version '1.0-SNAPSHOT'
 	id 'maven-publish'
+
+	id "com.modrinth.minotaur" version "2.+"
+	id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = "Fabric-${project.minecraft_version}-${project.name}"
+archivesBaseName = "Smooth Swapping ${project.mod_version} (${project.minecraft_version})"
 version = project.mod_version
 group = project.maven_group
+def CHANGELOG = new File("./gradle", "CHANGELOG.md").text
+def SUPPORTED_VERSIONS = Arrays.asList(project.supported_versions.split(','))
 
 repositories {
 	maven {
@@ -26,6 +31,8 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -95,4 +102,47 @@ publishing {
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
 	}
+}
+
+import com.modrinth.minotaur.dependencies.ModDependency
+if (System.getenv().MODRINTH_TOKEN) modrinth {
+	projectId = project.modrinth_id
+	versionName = "Smooth Swapping ${project.mod_version} (${project.minecraft_version})"
+	versionNumber = "${project.mod_version}-${project.minecraft_version}"
+	versionType = "beta"
+	uploadFile = tasks.remapJar
+	gameVersions = [project.minecraft_version]
+	loaders = ["fabric"]
+	dependencies = [
+		new ModDependency("fabric-api", "required"),
+		new ModDependency("cloth-config", "embedded"),
+		new ModDependency("modmenu", "optional")
+	]
+}
+
+if (System.getenv().CURSEFORGE_API_KEY) curseforge {
+	apiKey = System.getenv().CURSEFORGE_API_KEY
+
+	project {
+		id = project.curseforge_id
+		addGameVersion "Fabric"
+		for (final def cf_ver in SUPPORTED_VERSIONS) addGameVersion cf_ver
+
+		changelog = CHANGELOG
+		releaseType = "beta"
+
+		mainArtifact(remapJar) {
+			displayName = "Smooth Swapping ${project.mod_version} (${project.minecraft_version})"
+			relations {
+				requiredDependency "fabric-api"
+				embeddedLibrary "cloth-config"
+
+				optionalDependency 'modmenu'
+			}
+		}
+
+		afterEvaluate { uploadTask.dependsOn(remapJar) }
+	}
+
+	options { forgeGradleIntegration = false }
 }
