@@ -9,7 +9,7 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = "Smooth Swapping ${project.mod_version} (${project.minecraft_version})"
+archivesBaseName = "${project.mod_name} ${project.mod_version} (${project.minecraft_version})"
 version = project.mod_version
 group = project.maven_group
 def CHANGELOG = new File("./gradle", "CHANGELOG.md").text
@@ -27,12 +27,9 @@ repositories {
 }
 
 dependencies {
-	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
@@ -44,8 +41,8 @@ dependencies {
 	include("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config}")
 
 	//Modmenu
-	modImplementation ("com.terraformersmc:modmenu:${project.modmenu}"){
-		exclude(group : "net.fabricmc.fabric-api")
+	modImplementation("com.terraformersmc:modmenu:${project.modmenu}") {
+		exclude(group: "net.fabricmc.fabric-api")
 	}
 }
 
@@ -57,30 +54,23 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
-	// ensure that the encoding is set to UTF-8, no matter what the system default is
-	// this fixes some edge cases with special characters not displaying correctly
-	// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-	// If Javadoc is generated, this must be specified in that task too.
-	it.options.encoding = "UTF-8"
-
-	// Minecraft 1.17 (21w19a) upwards uses Java 16.
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
 	it.options.release = 17
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 }
 
+
 jar {
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+		rename { "${it}_${archivesBaseName}" }
 	}
 }
 
+// configure the maven publication
 // configure the maven publication
 publishing {
 	publications {
@@ -107,16 +97,16 @@ publishing {
 import com.modrinth.minotaur.dependencies.ModDependency
 if (System.getenv().MODRINTH_TOKEN) modrinth {
 	projectId = project.modrinth_id
-	versionName = "Smooth Swapping ${project.mod_version} (${project.minecraft_version})"
+	versionName = archivesBaseName
 	versionNumber = "${project.mod_version}-${project.minecraft_version}"
 	versionType = "beta"
 	uploadFile = tasks.remapJar
 	gameVersions = [project.minecraft_version]
 	loaders = ["fabric"]
 	dependencies = [
-		new ModDependency("fabric-api", "required"),
-		new ModDependency("cloth-config", "embedded"),
-		new ModDependency("modmenu", "optional")
+			new ModDependency("fabric-api", "required"),
+			new ModDependency("cloth-config", "embedded"),
+			new ModDependency("modmenu", "optional")
 	]
 }
 
@@ -132,7 +122,7 @@ if (System.getenv().CURSEFORGE_API_KEY) curseforge {
 		releaseType = "beta"
 
 		mainArtifact(remapJar) {
-			displayName = "Smooth Swapping ${project.mod_version} (${project.minecraft_version})"
+			displayName = archivesBaseName
 			relations {
 				requiredDependency "fabric-api"
 				embeddedLibrary "cloth-config"
