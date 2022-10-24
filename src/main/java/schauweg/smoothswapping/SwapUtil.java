@@ -3,10 +3,12 @@ package schauweg.smoothswapping;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.collection.DefaultedList;
 import schauweg.smoothswapping.config.Config;
 import schauweg.smoothswapping.swaps.InventorySwap;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.PI;
@@ -60,5 +62,11 @@ public class SwapUtil {
                 //for "ease-out" do nothing
             }
         return SwapUtil.bezierBlend(progress) * config.getEaseSpeedFormatted();
+    }
+
+    public static void addInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked, int amount) {
+        List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
+        swaps.add(new InventorySwap(fromSlot, toSlot, checked, amount));
+        SmoothSwapping.swaps.put(index, swaps);
     }
 }
