@@ -46,10 +46,10 @@ public abstract class ItemRendererMixin {
 	}
 	
 	@Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At(value = "HEAD"), cancellable = true)
-	private void onRenderOverlay(TextRenderer renderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo ci) {
+	private void onRenderOverlay(TextRenderer renderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo cbi) {
 		if (zOffset < 100) return; //fix so hotbar won't be affected
 		
-		doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, ci);
+		doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, cbi);
 	}
 	
 	private void doSwap(MinecraftClient client, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, float zOffset, CallbackInfo ci) {

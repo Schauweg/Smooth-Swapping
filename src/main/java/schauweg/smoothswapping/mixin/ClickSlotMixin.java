@@ -48,7 +48,7 @@ public class ClickSlotMixin {
                     if (destinationSlotID != slot) {
                         Slot destinationSlot = screenHandler.getSlot(destinationSlotID);
                         ItemStack oldStack = SmoothSwapping.oldStacks.get(destinationSlotID);
-
+//                        System.out.println(modifiedStacks);
                         //If destination slot can take items from player and destination slot is empty or has same item in it
                         if (destinationSlot.canTakePartial(player) && (oldStack.isEmpty() || oldStack.isItemEqual(SmoothSwapping.oldStacks.get(slot)))) {
                             int oldDestinationCount = SmoothSwapping.oldStacks.get(destinationSlot.id).getCount();

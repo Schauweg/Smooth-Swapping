@@ -24,6 +24,38 @@ public class HandledScreenMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     public void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
+//        MinecraftClient client = MinecraftClient.getInstance();
+//
+//        if (client.player == null || client.player.currentScreenHandler == null) {
+//            return;
+//        }
+//
+//        DefaultedList<ItemStack> stacks = client.player.currentScreenHandler.getStacks();
+//
+//        Screen screen = client.currentScreen;
+//        if (currentScreen != screen) {
+//            SmoothSwapping.swaps.clear();
+//            addAll(SmoothSwapping.oldStacks, stacks);
+//            currentScreen = screen;
+//        }
+//
+////        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, stacks);
+////
+////        if (changedStacks.size() > 0){
+////
+////
+////
+////            addAll(SmoothSwapping.oldStacks, stacks);
+////        }
+//
+//        if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)) {
+//            addAll(SmoothSwapping.oldStacks, stacks);
+//        }
+    }
+
+
+    @Inject(method = "handledScreenTick", at = @At("TAIL"))
+    public void onTick(CallbackInfo cbi) {
         MinecraftClient client = MinecraftClient.getInstance();
 
         if (client.player == null || client.player.currentScreenHandler == null) {
@@ -39,16 +71,17 @@ public class HandledScreenMixin {
             currentScreen = screen;
         }
 
-//        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, stacks);
-//
-//        if (changedStacks.size() > 0){
-//
-//
-//
-//            addAll(SmoothSwapping.oldStacks, stacks);
-//        }
+        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, stacks);
+        if (changedStacks.size() > 0){
+            System.out.println(changedStacks);
 
-        if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)){
+            //TODO calculate difference between stacks and decide what slots move to which
+
+
+            addAll(SmoothSwapping.oldStacks, stacks);
+        }
+
+        if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)) {
             addAll(SmoothSwapping.oldStacks, stacks);
         }
     }
@@ -59,9 +92,6 @@ public class HandledScreenMixin {
             ItemStack newStack = newStacks.get(slotID);
             ItemStack oldStack = oldStacks.get(slotID);
             if (!ItemStack.areEqual(oldStack, newStack)) {
-
-
-
                 changedStacks.put(slotID, newStack.copy());
             }
         }
@@ -83,7 +113,7 @@ public class HandledScreenMixin {
         return true;
     }
 
-    private void addAll(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks){
+    private void addAll(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
         oldStacks.clear();
         newStacks.stream().map(ItemStack::copy).forEach(oldStacks::add);
     }
