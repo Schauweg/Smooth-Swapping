@@ -21,6 +21,7 @@ import schauweg.smoothswapping.SwapStacks;
 import schauweg.smoothswapping.SwapUtil;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 @Mixin(HandledScreen.class)
@@ -32,39 +33,7 @@ public abstract class HandledScreenMixin {
     protected ScreenHandler handler;
     private Screen currentScreen = null;
 
-    @Inject(method = "render", at = @At("TAIL"))
-    public void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
-//        MinecraftClient client = MinecraftClient.getInstance();
-//
-//        if (client.player == null || client.player.currentScreenHandler == null) {
-//            return;
-//        }
-//
-//        DefaultedList<ItemStack> stacks = client.player.currentScreenHandler.getStacks();
-//
-//        Screen screen = client.currentScreen;
-//        if (currentScreen != screen) {
-//            SmoothSwapping.swaps.clear();
-//            addAll(SmoothSwapping.oldStacks, stacks);
-//            currentScreen = screen;
-//        }
-//
-////        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, stacks);
-////
-////        if (changedStacks.size() > 0){
-////
-////
-////
-////            addAll(SmoothSwapping.oldStacks, stacks);
-////        }
-//
-//        if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)) {
-//            addAll(SmoothSwapping.oldStacks, stacks);
-//        }
-    }
-
-
-    @Inject(method = "handledScreenTick", at = @At("TAIL"))
+    @Inject(method = "handledScreenTick", at = @At("HEAD"))
     public void onTick(CallbackInfo cbi) {
 
         HandledScreen handledScreen = (HandledScreen) (Object) this;
@@ -87,8 +56,7 @@ public abstract class HandledScreenMixin {
         }
 
         Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, stacks);
-        if (changedStacks.size() > 0) {
-//            System.out.println(changedStacks);
+        if (changedStacks.size() > 1) {
 
             Map<Integer, SwapStacks> moreStacks = new HashMap<>();
             Map<Integer, SwapStacks> lessStacks = new HashMap<>();
@@ -98,53 +66,52 @@ public abstract class HandledScreenMixin {
                 ItemStack newStack = stackEntry.getValue();
                 ItemStack oldStack = SmoothSwapping.oldStacks.get(slotID);
 
-                if (getCount(newStack) > getCount(oldStack)) {
-                    moreStacks.put(slotID, new SwapStacks(oldStack, newStack, getCount(newStack) - getCount(oldStack)));
-                } else if (getCount(newStack) < getCount(oldStack)) {
+                //whether the stack got more items or less and if slot is output slot
+                if (getCount(newStack) > getCount(oldStack) && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player)) {
+                    moreStacks.put(slotID, new SwapStacks(oldStack, newStack, getCount(oldStack) - getCount(newStack)));
+                } else if (getCount(newStack) < getCount(oldStack) && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player)) {
                     lessStacks.put(slotID, new SwapStacks(oldStack, newStack, getCount(oldStack) - getCount(newStack)));
                 }
             }
 
-//            System.out.println("More Stacks: " + moreStacks);
-//            System.out.println("Less Stacks: " + lessStacks);
-
-            for (Map.Entry<Integer, SwapStacks> lessStackEntry : lessStacks.entrySet()) {
+            Iterator<Map.Entry<Integer,SwapStacks>> lessIter = lessStacks.entrySet().iterator();
+            while (lessIter.hasNext()){
+                Map.Entry<Integer,SwapStacks> lessStackEntry = lessIter.next();
                 SwapStacks lessSwapStacks = lessStackEntry.getValue();
+                if (lessSwapStacks.itemCountToChange <= 0 ){
+                    lessIter.remove();
+                    continue;
+                }
+
                 Slot lessSlot = handler.getSlot(lessStackEntry.getKey());
 
                 while (lessSwapStacks.itemCountToChange > 0) {
-                    for (Map.Entry<Integer, SwapStacks> moreStackEntry : moreStacks.entrySet()) {
+                    Iterator<Map.Entry<Integer,SwapStacks>> moreIter = moreStacks.entrySet().iterator();
+                    while (moreIter.hasNext()){
+
+                        Map.Entry<Integer,SwapStacks> moreStackEntry = moreIter.next();
                         SwapStacks moreSwapStacks = moreStackEntry.getValue();
-                        Slot moreSlot = handler.getSlot(moreStackEntry.getKey());
-                        if (moreSwapStacks.itemCountToChange <= 0) {
-                            moreStacks.remove(moreStackEntry.getKey());
+                        if (moreSwapStacks.itemCountToChange >= 0 ){
+                            moreIter.remove();
                             continue;
                         }
+
+                        Slot moreSlot = handler.getSlot(moreStackEntry.getKey());
 
                         if (!ItemStack.areItemsEqual(lessSwapStacks.getOldStack(), moreSwapStacks.getNewStack())) {
                             continue;
                         }
 
-                        System.out.println("less: " + lessSwapStacks.itemCountToChange);
-                        System.out.println("more: " + moreSwapStacks.itemCountToChange);
-
-                        if (lessSwapStacks.itemCountToChange >= moreSwapStacks.itemCountToChange) {
-                            lessSwapStacks.itemCountToChange -= moreSwapStacks.itemCountToChange;
-                            moreSwapStacks.itemCountToChange = 0;
-                        } else {
-                            moreSwapStacks.itemCountToChange -= lessSwapStacks.itemCountToChange;
-                            lessSwapStacks.itemCountToChange = 0;
+                        while (lessSwapStacks.itemCountToChange > 0 && moreSwapStacks.itemCountToChange < 0) {
+                            lessSwapStacks.itemCountToChange--;
+                            moreSwapStacks.itemCountToChange++;
                         }
+
                         int amount = moreSwapStacks.getNewCount() - moreSwapStacks.getOldCount();
-                        SwapUtil.addInventorySwap(moreSlot.getIndex(), lessSlot, moreSlot, false, amount);
+                        SwapUtil.addInventorySwap(moreSlot.id, lessSlot, moreSlot, false, amount);
                     }
                 }
-
-
             }
-
-
-            addAll(SmoothSwapping.oldStacks, stacks);
         }
 
         if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)) {

@@ -30,10 +30,11 @@ public class ClickSlotMixin {
     //id of slot that got clicked/hovered over
     @Shadow @Final private int slot;
 
-//    @Inject(method = "<init>(IIIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/item/ItemStack;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("TAIL"))
-//    public void onInit(CallbackInfo cbi){
-//        //remove swap when stack gets moved before it arrived
-//        SmoothSwapping.swaps.remove(slot);
+    @Inject(method = "<init>(IIIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/item/ItemStack;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("TAIL"))
+    public void onInit(CallbackInfo cbi) {
+        //remove swap when stack gets moved before it arrived
+        SmoothSwapping.swaps.remove(slot);
+    }
 //
 //        if ((actionType == SlotActionType.QUICK_MOVE || actionType == SlotActionType.SWAP) && modifiedStacks.size() > 1 && MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
 //            assert MinecraftClient.getInstance().player != null;
