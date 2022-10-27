@@ -69,15 +69,9 @@ public abstract class ItemRendererMixin {
 				//render all swaps for one slot
 				for (int i = 0; i < swapList.size(); i++) {
 					InventorySwap swap = swapList.get(i);
-					
-					if (!swap.isChecked() && ItemStack.areItemsEqual(SmoothSwapping.oldStacks.get(index), stack)) {
-						swap.setChecked(true);
-						swap.setRenderDestinationSlot(true);
-					} else if (!swap.isChecked()) {
-						swap.setChecked(true);
-					}
-					
-					
+
+					swap.setRenderDestinationSlot(swap.isChecked());
+
 					if (!swap.renderDestinationSlot()) {
 						renderDestinationSlot = false;
 					}
@@ -89,7 +83,6 @@ public abstract class ItemRendererMixin {
 						setRenderToTrue(swapList);
 						swapList.remove(swap);
 					}
-					
 				}
 				
 				//whether the destination slot should be rendered

@@ -36,6 +36,7 @@ public abstract class HandledScreenMixin {
     @Inject(method = "handledScreenTick", at = @At("HEAD"))
     public void onTick(CallbackInfo cbi) {
 
+        @SuppressWarnings("rawtypes")
         HandledScreen handledScreen = (HandledScreen) (Object) this;
 
         if (handledScreen instanceof CreativeInventoryScreen) return;
@@ -74,11 +75,11 @@ public abstract class HandledScreenMixin {
                 }
             }
 
-            Iterator<Map.Entry<Integer,SwapStacks>> lessIter = lessStacks.entrySet().iterator();
-            while (lessIter.hasNext()){
-                Map.Entry<Integer,SwapStacks> lessStackEntry = lessIter.next();
+            Iterator<Map.Entry<Integer, SwapStacks>> lessIter = lessStacks.entrySet().iterator();
+            while (lessIter.hasNext()) {
+                Map.Entry<Integer, SwapStacks> lessStackEntry = lessIter.next();
                 SwapStacks lessSwapStacks = lessStackEntry.getValue();
-                if (lessSwapStacks.itemCountToChange <= 0 ){
+                if (lessSwapStacks.itemCountToChange <= 0) {
                     lessIter.remove();
                     continue;
                 }
@@ -86,15 +87,13 @@ public abstract class HandledScreenMixin {
                 Slot lessSlot = handler.getSlot(lessStackEntry.getKey());
 
                 while (lessSwapStacks.itemCountToChange > 0) {
-                    Iterator<Map.Entry<Integer,SwapStacks>> moreIter = moreStacks.entrySet().iterator();
-                    while (moreIter.hasNext()){
+                    System.out.println(lessSwapStacks.itemCountToChange);
+                    Iterator<Map.Entry<Integer, SwapStacks>> moreIter = moreStacks.entrySet().iterator();
+                    while (moreIter.hasNext()) {
 
-                        Map.Entry<Integer,SwapStacks> moreStackEntry = moreIter.next();
+                        Map.Entry<Integer, SwapStacks> moreStackEntry = moreIter.next();
                         SwapStacks moreSwapStacks = moreStackEntry.getValue();
-                        if (moreSwapStacks.itemCountToChange >= 0 ){
-                            moreIter.remove();
-                            continue;
-                        }
+
 
                         Slot moreSlot = handler.getSlot(moreStackEntry.getKey());
 
@@ -107,8 +106,13 @@ public abstract class HandledScreenMixin {
                             moreSwapStacks.itemCountToChange++;
                         }
 
+                        if (moreSwapStacks.itemCountToChange >= 0) {
+                            moreIter.remove();
+                            continue;
+                        }
+
                         int amount = moreSwapStacks.getNewCount() - moreSwapStacks.getOldCount();
-                        SwapUtil.addInventorySwap(moreSlot.id, lessSlot, moreSlot, false, amount);
+                        SwapUtil.addInventorySwap(moreSlot.id, lessSlot, moreSlot, ItemStack.areItemsEqual(moreSwapStacks.getOldStack(), moreSwapStacks.getNewStack()), amount);
                     }
                 }
             }
