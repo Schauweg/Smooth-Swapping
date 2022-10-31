@@ -20,6 +20,10 @@ public class SmoothSwapping implements ClientModInitializer {
     public static final Gson GSON = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).setPrettyPrinting().create();
     
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+
+    public static boolean clickSwap;
+
+    public static Integer clickSwapStack;
     
     public static Map<Integer, List<InventorySwap>> swaps;
     public static DefaultedList<ItemStack> oldStacks;

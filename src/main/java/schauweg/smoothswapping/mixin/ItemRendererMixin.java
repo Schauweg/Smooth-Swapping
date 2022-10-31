@@ -10,7 +10,6 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,6 +39,8 @@ public abstract class ItemRendererMixin {
 			
 			if (client.player == null)
 				return;
+
+
 			
 			doSwap(client, stack, renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model, zOffset, cbi);
 		}
