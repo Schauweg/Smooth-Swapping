@@ -1,1 +1,1 @@
--Update to Minecraft 1.19.2
+-Changed the way item swaps are detected

@@ -10,7 +10,6 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,16 +39,18 @@ public abstract class ItemRendererMixin {
 			
 			if (client.player == null)
 				return;
+
+
 			
 			doSwap(client, stack, renderMode, leftHanded, matrices, vertexConsumers, light, overlay, model, zOffset, cbi);
 		}
 	}
 	
 	@Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At(value = "HEAD"), cancellable = true)
-	private void onRenderOverlay(TextRenderer renderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo ci) {
+	private void onRenderOverlay(TextRenderer renderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo cbi) {
 		if (zOffset < 100) return; //fix so hotbar won't be affected
 		
-		doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, ci);
+		doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, cbi);
 	}
 	
 	private void doSwap(MinecraftClient client, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, float zOffset, CallbackInfo ci) {
@@ -69,15 +70,9 @@ public abstract class ItemRendererMixin {
 				//render all swaps for one slot
 				for (int i = 0; i < swapList.size(); i++) {
 					InventorySwap swap = swapList.get(i);
-					
-					if (!swap.isChecked() && ItemStack.areItemsEqual(SmoothSwapping.oldStacks.get(index), stack)) {
-						swap.setChecked(true);
-						swap.setRenderDestinationSlot(true);
-					} else if (!swap.isChecked()) {
-						swap.setChecked(true);
-					}
-					
-					
+
+					swap.setRenderDestinationSlot(swap.isChecked());
+
 					if (!swap.renderDestinationSlot()) {
 						renderDestinationSlot = false;
 					}
@@ -89,7 +84,6 @@ public abstract class ItemRendererMixin {
 						setRenderToTrue(swapList);
 						swapList.remove(swap);
 					}
-					
 				}
 				
 				//whether the destination slot should be rendered

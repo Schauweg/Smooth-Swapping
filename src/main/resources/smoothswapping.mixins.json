@@ -7,9 +7,8 @@
   ],
   "client": [
     "HandledScreenMixin",
-    "ClickSlotMixin",
-    "ItemRendererMixin",
-    "CraftRequestMixin"
+    "ClickSlotPacketMixin",
+    "ItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
