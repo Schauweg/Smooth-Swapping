@@ -1,6 +1,7 @@
 package schauweg.smoothswapping.mixin;
 
 import java.util.List;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -112,6 +113,12 @@ public abstract class ItemRendererMixin {
                 boolean renderToSlot = true;
         
                 for (InventorySwap swap : swapList) {
+
+                    if (!ItemStack.areItemsEqual(stack, swap.getSwapItem())) {
+                        SmoothSwapping.swaps.remove(index);
+                        return;
+                    }
+
                     stackCount -= swap.getAmount();
                     if (!swap.renderDestinationSlot()) {
                         renderToSlot = false;
