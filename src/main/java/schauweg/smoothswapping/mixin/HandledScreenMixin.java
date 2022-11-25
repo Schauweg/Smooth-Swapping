@@ -19,9 +19,9 @@ import schauweg.smoothswapping.SwapUtil;
 
 import java.util.*;
 
-import static schauweg.smoothswapping.SmoothSwapping.clickSwap;
-import static schauweg.smoothswapping.SmoothSwapping.clickSwapStack;
+import static schauweg.smoothswapping.SmoothSwapping.*;
 import static schauweg.smoothswapping.SwapUtil.getCount;
+import static schauweg.smoothswapping.SwapUtil.updateStacks;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin {
@@ -46,24 +46,24 @@ public abstract class HandledScreenMixin {
             return;
         }
 
-        DefaultedList<ItemStack> stacks = client.player.currentScreenHandler.getStacks();
+        currentStacks = client.player.currentScreenHandler.getStacks();
 
         Screen screen = client.currentScreen;
 
         if (clickSwap) {
             clickSwap = false;
-            addAll(SmoothSwapping.oldStacks, stacks);
+            updateStacks(currentStacks, oldStacks);
             return;
         }
 
         if (currentScreen != screen) {
             SmoothSwapping.swaps.clear();
-            addAll(SmoothSwapping.oldStacks, stacks);
+            updateStacks(currentStacks, oldStacks);
             currentScreen = screen;
             return;
         }
 
-        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, stacks);
+        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, currentStacks);
         if (changedStacks.size() > 1 && !clickSwap) {
 
             List<SwapStacks> moreStacks = new ArrayList<>();
@@ -93,8 +93,8 @@ public abstract class HandledScreenMixin {
             SwapUtil.assignSwaps(moreStacks, lessStacks, handler);
         }
 
-        if (!areStacksEqual(SmoothSwapping.oldStacks, stacks)) {
-            addAll(SmoothSwapping.oldStacks, stacks);
+        if (!areStacksEqual(SmoothSwapping.oldStacks, currentStacks)) {
+            updateStacks(currentStacks, oldStacks);
         }
     }
 
@@ -126,8 +126,5 @@ public abstract class HandledScreenMixin {
     }
 
 
-    private void addAll(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
-        oldStacks.clear();
-        newStacks.stream().map(ItemStack::copy).forEach(oldStacks::add);
-    }
+
 }

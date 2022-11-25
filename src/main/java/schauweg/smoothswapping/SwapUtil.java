@@ -1,12 +1,10 @@
 package schauweg.smoothswapping;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.collection.DefaultedList;
-import schauweg.smoothswapping.config.Config;
 import schauweg.smoothswapping.swaps.InventorySwap;
 
 import java.util.ArrayList;
@@ -31,10 +29,7 @@ public class SwapUtil {
     }
 
     public static int getSlotIndex(ItemStack stack) {
-        if (MinecraftClient.getInstance().player == null) return -1;
-        ScreenHandler handler = MinecraftClient.getInstance().player.currentScreenHandler;
-        DefaultedList<ItemStack> stacks = handler.getStacks();
-        return stacks.indexOf(stack);
+        return SmoothSwapping.currentStacks.indexOf(stack);
     }
 
     public static void setRenderToTrue(List<InventorySwap> swapList) {
@@ -43,30 +38,20 @@ public class SwapUtil {
         }
     }
 
-    private static int getQuadrant(float angle) {
+    private static int getQuadrant(double angle) {
         return (int) (Math.floor(2 * angle / PI) % 4 + 4) % 4;
     }
 
-    public static float bezierBlend(float t) {
-        return t * t * (3.0f - 2.0f * t);
-    }
-
-    public static float map(float in, float inMin, float inMax, float outMax, float outMin) {
+    public static double map(double in, double inMin, double inMax, double outMax, double outMin) {
         return (in - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
-    }
-
-    public static float getEase(Config config, float progress){
-            switch (config.getEaseMode()) {
-                case "linear" -> progress = 1f;
-                case "ease-in" -> progress = progress - 1;
-                case "ease-in-out" -> progress = progress >= 0.5f ? 1f - progress : progress;
-                //for "ease-out" do nothing
-            }
-        return SwapUtil.bezierBlend(progress) * config.getEaseSpeedFormatted();
     }
 
     public static void addInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked, int amount) {
         List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
+
+        if (ItemStack.areItemsEqual(toSlot.getStack(), Items.AIR.getDefaultStack()))
+            return;
+
         swaps.add(new InventorySwap(fromSlot, toSlot, checked, amount));
         SmoothSwapping.swaps.put(index, swaps);
     }
@@ -93,7 +78,7 @@ public class SwapUtil {
                     }
 
                     Slot lessSlot = handler.getSlot(lessStack.getSlotID());
-                    SwapUtil.addInventorySwap(moreStack.getSlotID(), lessSlot, moreSlot, ItemStack.areItemsEqual(moreStack.getOldStack(), moreStack.getNewStack()), amount);
+                    addInventorySwap(moreStack.getSlotID(), lessSlot, moreSlot, ItemStack.areItemsEqual(moreStack.getOldStack(), moreStack.getNewStack()), amount);
                     if (lessStack.itemCountToChange == 0){
                         lessStacks.remove(lessStack);
                     }
@@ -107,6 +92,11 @@ public class SwapUtil {
 
     public static int getCount(ItemStack stack) {
         return ItemStack.areItemsEqual(stack, Items.AIR.getDefaultStack()) ? 0 : stack.getCount();
+    }
+
+    public static void updateStacks(DefaultedList<ItemStack> newStacks, DefaultedList<ItemStack> oldStacks) {
+        oldStacks.clear();
+        newStacks.stream().map(ItemStack::copy).forEach(oldStacks::add);
     }
 
 }

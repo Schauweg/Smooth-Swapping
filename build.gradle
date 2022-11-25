@@ -17,10 +17,6 @@ def SUPPORTED_VERSIONS = Arrays.asList(project.supported_versions.split(','))
 
 repositories {
 	maven {
-		name = 'Cloth Config'
-		url = 'https://maven.shedaniel.me'
-	}
-	maven {
 		name = 'TerraformersMC'
 		url = 'https://maven.terraformersmc.com/releases'
 	}
@@ -33,12 +29,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	//Cloth Config
-	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config}") {
-		exclude(group: "net.fabricmc.fabric-api")
-	}
-	include("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config}")
 
 	//Modmenu
 	modImplementation("com.terraformersmc:modmenu:${project.modmenu}") {
