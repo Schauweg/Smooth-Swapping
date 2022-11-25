@@ -1,40 +1,51 @@
 package schauweg.smoothswapping.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Config {
 
     private int animationSpeed = 100;
-    private String easeMode = "linear";
-    private int easeSpeed = 400;
-
+    private float[][] curvePoints = new float[][]{};
     public int getAnimationSpeed() {
         return animationSpeed;
     }
-
     public void setAnimationSpeed(int animationSpeed) {
         this.animationSpeed = animationSpeed;
     }
-
     public float getAnimationSpeedFormatted() {
         return animationSpeed / 100F;
     }
 
-    public int getEaseSpeed() {
-        return easeSpeed;
+    public List<CatmullRomWidget.CatmullRomSpline> getSplines() {
+        return CatmullRomWidget.splinesFromPoints(getCurvePoints());
     }
 
-    public void setEaseSpeed(int easeSpeed) {
-        this.easeSpeed = easeSpeed;
+    public void setCurvePoints(List<Vec2> points) {
+        float[][] curvePoints = new float[points.size() - 4][2];
+
+        for (int i = 2; i < points.size() - 2; i++) {
+            Vec2 p = points.get(i);
+            curvePoints[i - 2][0] = (float) p.v[0];
+            curvePoints[i - 2][1] = (float) p.v[1];
+        }
+        this.curvePoints = curvePoints;
     }
 
-    public float getEaseSpeedFormatted() {
-        return easeSpeed / 100F;
-    }
+    public List<Vec2> getCurvePoints() {
 
-    public String getEaseMode() {
-        return easeMode;
-    }
+        List<Vec2> points = new ArrayList<>();
 
-    public void setEaseMode(String easeMode) {
-        this.easeMode = easeMode;
+        points.add(new Vec2(0, 0));
+        points.add(new Vec2(0, 0));
+
+        for (float[] curvePoint : curvePoints) {
+            points.add(new Vec2(curvePoint[0], curvePoint[1]));
+        }
+
+        points.add(new Vec2(1, 1));
+        points.add(new Vec2(1, 1));
+
+        return points;
     }
 }

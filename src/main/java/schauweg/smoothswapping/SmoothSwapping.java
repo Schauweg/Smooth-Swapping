@@ -26,13 +26,14 @@ public class SmoothSwapping implements ClientModInitializer {
     public static Integer clickSwapStack;
     
     public static Map<Integer, List<InventorySwap>> swaps;
-    public static DefaultedList<ItemStack> oldStacks;
+    public static DefaultedList<ItemStack> oldStacks, currentStacks;
 
     @Override
     public void onInitializeClient() {
         ConfigManager.initializeConfig();
         swaps = new HashMap<>();
         oldStacks = DefaultedList.of();
+        currentStacks = DefaultedList.of();
     }
 
 }

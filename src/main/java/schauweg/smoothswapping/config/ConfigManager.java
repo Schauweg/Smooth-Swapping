@@ -50,7 +50,6 @@ public class ConfigManager {
 
     public static void save() {
         prepareConfigFile();
-
         String jsonString = SmoothSwapping.GSON.toJson(config);
 
         try (FileWriter fileWriter = new FileWriter(file)) {
