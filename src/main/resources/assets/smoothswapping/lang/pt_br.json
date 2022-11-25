@@ -1,0 +1,10 @@
+{
+    "smoothswapping.config.menu": "Smooth Swapping Menu de configuração",
+    "smoothswapping.config.general": "Geral",
+    "smoothswapping.config.testinventory": "Inventário de teste",
+    "smoothswapping.config.option.animationspeed": "Velocidade da animação",
+    "smoothswapping.config.option.animationspeed.speed": "Velocidade",
+    "smoothswapping.config.option.animationspeed.reset": "Redefinir",
+    "smoothswapping.config.save": "Salvar & Sair",
+    "smoothswapping.config.exit": "Sair"
+  }
