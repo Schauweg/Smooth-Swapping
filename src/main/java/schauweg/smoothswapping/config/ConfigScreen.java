@@ -1,67 +1,78 @@
 package schauweg.smoothswapping.config;
 
-import me.shedaniel.clothconfig2.api.ConfigBuilder;
-import me.shedaniel.clothconfig2.api.ConfigCategory;
-import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
+import com.mojang.serialization.Codec;
+import com.terraformersmc.modmenu.api.ConfigScreenFactory;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.option.SimpleOption;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-import java.util.function.Function;
+import java.util.List;
 
-public class ConfigScreen {
+public class ConfigScreen extends Screen implements ConfigScreenFactory<Screen> {
 
-    public static Screen getScreen(Screen parent) {
-        Config config = ConfigManager.getConfig();
+    CatmullRomWidget catmullRomWidget;
+    InventoryWidget inventoryWidget;
+    Config config;
+    SimpleOption<Integer> animationSpeedOption;
+    private final int oldAnimationSpeed;
+    Screen parentScreen;
+    List<Vec2> oldPoints;
 
-        ConfigBuilder builder = ConfigBuilder.create()
-                .setParentScreen(parent)
-                .setTitle(Text.translatable("smoothswapping.config.menu"));
-
-        ConfigCategory general = builder.getOrCreateCategory(Text.translatable("smoothswapping.config.general"));
-        ConfigEntryBuilder entryBuilder = builder.entryBuilder();
-
-        general.addEntry(entryBuilder.startIntSlider(Text.translatable("smoothswapping.config.option.animationspeed"), config.getAnimationSpeed(), 10, 500)
-                .setDefaultValue(100)
-                .setSaveConsumer(config::setAnimationSpeed)
-                .setTextGetter(getIntSlider("smoothswapping.config.option.animationspeed.speed"))
-                .build());
-
-        SelectionListEntry<String> easeMode = entryBuilder.startSelector(Text.translatable("smoothswapping.config.option.ease"), new String[]{"linear", "ease-in", "ease-out", "ease-in-out"}, config.getEaseMode())
-                .setDefaultValue("linear")
-                .setSaveConsumer(config::setEaseMode)
-                .setNameProvider(getString("smoothswapping.config.option.ease."))
-                .build();
-
-        general.addEntry(easeMode);
-
-        general.addEntry(entryBuilder.startIntSlider(Text.translatable("smoothswapping.config.option.easespeed"), config.getEaseSpeed(), 50, 1000)
-                .setDefaultValue(400)
-                .setSaveConsumer(config::setEaseSpeed)
-                .setTextGetter(getIntSlider("smoothswapping.config.option.easespeed.speed"))
-                .build());
-
-
-        builder.setSavingRunnable(ConfigManager::save);
-
-        return builder.build();
+    public ConfigScreen(Screen parent) {
+        super(Text.translatable("smoothswapping.config.menu"));
+        config = ConfigManager.getConfig();
+        this.animationSpeedOption = new SimpleOption<>("options.framerateLimit",
+                SimpleOption.emptyTooltip(),
+                (optionText, value) -> Text.translatable("smoothswapping.config.option.animationspeed.speed").append(": ").append(Text.literal(value + "%")),
+                (new SimpleOption.ValidatingIntSliderCallbacks(1, 50)).withModifier(
+                        (value) -> value * 10,
+                        (value) -> value / 10),
+                Codec.intRange(10, 500),
+                config.getAnimationSpeed(),
+                (value) -> config.setAnimationSpeed(value));
+        this.oldAnimationSpeed = config.getAnimationSpeed();
+        this.parentScreen = parent;
+        this.oldPoints = config.getCurvePoints();
     }
 
-
-    private static Function<Boolean, Text> getYesNoSupplier(String keyYes, String keyNo) {
-        return x -> {
-            if (x)
-                return Text.translatable(keyYes);
-            else
-                return Text.translatable(keyNo);
-        };
+    @Override
+    protected void init() {
+        this.addDrawableChild(animationSpeedOption.createButton(MinecraftClient.getInstance().options, this.width / 2 - 94, this.height / 5, 188));
+        this.catmullRomWidget = new CatmullRomWidget(this.width / 2 - 84 - 10, this.height / 3, 64, 64, 12, 4, 4, config.getCurvePoints());
+        this.inventoryWidget = new InventoryWidget(this.width / 2 + 10, this.height / 3, 3, 4, Text.translatable("smoothswapping.config.testinventory"));
+        this.addDrawableChild(this.catmullRomWidget);
+        this.addDrawableChild(this.inventoryWidget);
+        this.addDrawableChild(new ButtonWidget(this.width / 2 - 84 - 10, this.height / 3 + 86 + 4, 88, 20, Text.translatable("smoothswapping.config.option.animationspeed.reset"), button ->
+                catmullRomWidget.reset()
+        ));
+        this.addDrawableChild(new ButtonWidget(this.width / 2 + 10, this.height - 30, 88, 20, Text.translatable("smoothswapping.config.save"), button -> {
+            ConfigManager.save();
+            MinecraftClient.getInstance().setScreen(parentScreen);
+        }));
+        this.addDrawableChild(new ButtonWidget(this.width / 2 - 84 - 10, this.height - 30, 88, 20, Text.translatable("smoothswapping.config.exit"), button -> this.close()));
     }
 
-    private static Function<String, Text> getString(String key) {
-        return x -> Text.translatable(key + x);
+    @Override
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        this.renderBackgroundTexture(0);
+        DrawableHelper.drawCenteredText(matrices, textRenderer, title, this.width / 2, 10, 0xFFFFFFFF);
+        super.render(matrices, mouseX, mouseY, delta);
+        config.setCurvePoints(catmullRomWidget.getPoints());
     }
 
-    private static Function<Integer, Text> getIntSlider(String key) {
-        return x -> Text.translatable(key).append(": " + x / 100F);
+    @Override
+    public Screen create(Screen parent) {
+        return this;
+    }
+
+    @Override
+    public void close() {
+        config.setCurvePoints(oldPoints);
+        config.setAnimationSpeed(oldAnimationSpeed);
+        MinecraftClient.getInstance().setScreen(parentScreen);
     }
 }
