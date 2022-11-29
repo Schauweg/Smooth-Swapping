@@ -55,7 +55,7 @@ public class ClickSlotPacketMixin {
                 ItemStack oldMouseStack = SmoothSwapping.oldStacks.get(slot);
 
                 //only if new items are less or equal (crafting table output for example)
-                if (newMouseStack.getCount() - oldMouseStack.getCount() <= 0) {
+                if (newMouseStack == null || newMouseStack.getCount() - oldMouseStack.getCount() <= 0) {
                     SmoothSwapping.clickSwapStack = slot;
 
                 }
