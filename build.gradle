@@ -89,7 +89,6 @@ if (System.getenv().MODRINTH_TOKEN) modrinth {
 	loaders = ["fabric"]
 	dependencies = [
 			new ModDependency("fabric-api", "required"),
-			new ModDependency("cloth-config", "embedded"),
 			new ModDependency("modmenu", "optional")
 	]
 }
@@ -109,7 +108,6 @@ if (System.getenv().CURSEFORGE_API_KEY) curseforge {
 			displayName = archivesBaseName
 			relations {
 				requiredDependency "fabric-api"
-				embeddedLibrary "cloth-config"
 
 				optionalDependency 'modmenu'
 			}

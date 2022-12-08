@@ -46,14 +46,20 @@ public class ConfigScreen extends Screen implements ConfigScreenFactory<Screen> 
         this.inventoryWidget = new InventoryWidget(this.width / 2 + 10, this.height / 3, 3, 4, Text.translatable("smoothswapping.config.testinventory"));
         this.addDrawableChild(this.catmullRomWidget);
         this.addDrawableChild(this.inventoryWidget);
-        this.addDrawableChild(new ButtonWidget(this.width / 2 - 84 - 10, this.height / 3 + 86 + 4, 88, 20, Text.translatable("smoothswapping.config.option.animationspeed.reset"), button ->
-                catmullRomWidget.reset()
-        ));
-        this.addDrawableChild(new ButtonWidget(this.width / 2 + 10, this.height - 30, 88, 20, Text.translatable("smoothswapping.config.save"), button -> {
+
+        ButtonWidget resetButton = ButtonWidget.builder(Text.translatable("smoothswapping.config.option.animationspeed.reset"), button ->
+                catmullRomWidget.reset()).dimensions(this.width / 2 - 84 - 10, this.height / 3 + 86 + 4, 88, 20).build();
+        this.addDrawableChild(resetButton);
+
+        ButtonWidget saveButton = ButtonWidget.builder(Text.translatable("smoothswapping.config.save"), button -> {
             ConfigManager.save();
             MinecraftClient.getInstance().setScreen(parentScreen);
-        }));
-        this.addDrawableChild(new ButtonWidget(this.width / 2 - 84 - 10, this.height - 30, 88, 20, Text.translatable("smoothswapping.config.exit"), button -> this.close()));
+        }).dimensions(this.width / 2 + 10, this.height - 30, 88, 20).build();
+        this.addDrawableChild(saveButton);
+
+        ButtonWidget exitButton = ButtonWidget.builder(Text.translatable("smoothswapping.config.exit"), button -> this.close())
+                .dimensions(this.width / 2 - 84 - 10, this.height - 30, 88, 20).build();
+        this.addDrawableChild(exitButton);
     }
 
     @Override
