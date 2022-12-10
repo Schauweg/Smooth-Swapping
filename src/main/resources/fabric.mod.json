@@ -21,6 +21,7 @@
     "smoothswapping.mixins.json"
   ],
   "contact": {
+    "homepage": "https://modrinth.com/mod/smooth-swapping",
     "sources": "https://github.com/Schauweg/Smooth-Swapping",
     "issues": "https://github.com/Schauweg/Smooth-Swapping/issues"
   },
