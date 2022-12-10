@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import schauweg.smoothswapping.SmoothSwapping;
 import schauweg.smoothswapping.SwapStacks;
 import schauweg.smoothswapping.SwapUtil;
+import schauweg.smoothswapping.config.ConfigManager;
 
 import java.util.*;
 
@@ -34,6 +35,8 @@ public abstract class HandledScreenMixin {
 
     @Inject(method = "render", at = @At("HEAD"))
     public void onRender(CallbackInfo cbi) {
+        if (!ConfigManager.getConfig().getToggleMod())
+            return;
 
         @SuppressWarnings("rawtypes")
         HandledScreen handledScreen = (HandledScreen) (Object) this;

@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import schauweg.smoothswapping.SmoothSwapping;
+import schauweg.smoothswapping.config.ConfigManager;
 
 import java.util.*;
 
@@ -39,6 +40,9 @@ public class ClickSlotPacketMixin {
 
     @Inject(method = "<init>(IIIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/item/ItemStack;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("TAIL"))
     public void onInit(CallbackInfo cbi) {
+        if (!ConfigManager.getConfig().getToggleMod())
+            return;
+
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove(slot);
 
