@@ -7,6 +7,7 @@ import net.minecraft.screen.ScreenTexts;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import schauweg.smoothswapping.SwapUtil;
+import schauweg.smoothswapping.Vec2;
 
 import java.util.*;
 

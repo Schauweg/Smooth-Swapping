@@ -1,4 +1,4 @@
-package schauweg.smoothswapping.config;
+package schauweg.smoothswapping;
 
 import org.jetbrains.annotations.NotNull;
 

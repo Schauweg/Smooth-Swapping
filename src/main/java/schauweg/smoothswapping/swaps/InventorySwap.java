@@ -7,7 +7,8 @@ public class InventorySwap {
 
     private double x, y;
     private final double distance, startX, startY, angle;
-    private boolean renderDestinationSlot, checked;
+    private boolean renderDestinationSlot;
+    private final boolean checked;
     private final int amount;
     
     private final ItemStack swapItem;
