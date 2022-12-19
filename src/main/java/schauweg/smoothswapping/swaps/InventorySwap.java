@@ -1,7 +1,7 @@
 package schauweg.smoothswapping.swaps;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
+import schauweg.smoothswapping.Vec2;
 
 public class InventorySwap {
 
@@ -13,17 +13,17 @@ public class InventorySwap {
     
     private final ItemStack swapItem;
 
-    public InventorySwap(Slot fromSlot, Slot toSlot, boolean checked, int amount) {
-        this.x = toSlot.x - fromSlot.x;
-        this.y = toSlot.y - fromSlot.y;
-        this.startX = toSlot.x - fromSlot.x;
-        this.startY = toSlot.y - fromSlot.y;
+    public InventorySwap(Vec2 fromVec, Vec2 toVec, ItemStack swapItem, boolean checked, int amount) {
+        this.x = toVec.v[0] - fromVec.v[0];
+        this.y = toVec.v[1] - fromVec.v[1];
+        this.startX = toVec.v[0] - fromVec.v[0];
+        this.startY = toVec.v[1] - fromVec.v[1];
         this.angle = (float) (Math.atan2(y, x) + Math.PI);
         this.distance = Math.hypot(x, y);
         this.renderDestinationSlot = false;
         this.checked = checked;
         this.amount = amount;
-        this.swapItem = toSlot.getStack();
+        this.swapItem = swapItem;
     }
 
     public double getAngle() {

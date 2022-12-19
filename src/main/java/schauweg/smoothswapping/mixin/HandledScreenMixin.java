@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import schauweg.smoothswapping.SmoothSwapping;
 import schauweg.smoothswapping.SwapStacks;
 import schauweg.smoothswapping.SwapUtil;
+import schauweg.smoothswapping.Vec2;
 import schauweg.smoothswapping.config.ConfigManager;
 
 import java.util.*;
@@ -31,10 +33,14 @@ public abstract class HandledScreenMixin {
     @Shadow
     @Final
     protected ScreenHandler handler;
+
+    @Shadow
+    protected int x, y;
+
     private Screen currentScreen = null;
 
     @Inject(method = "render", at = @At("HEAD"))
-    public void onRender(CallbackInfo cbi) {
+    public void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
 
@@ -93,7 +99,11 @@ public abstract class HandledScreenMixin {
                 lessStacks.add(new SwapStacks(clickSwapStack, oldStack, newStack, totalAmount));
                 SmoothSwapping.clickSwapStack = null;
             }
-            SwapUtil.assignSwaps(moreStacks, lessStacks, handler);
+            if (moreStacks.isEmpty()) {
+                SwapUtil.assignI2CSwaps(client, lessStacks, new Vec2(mouseX - x, mouseY - y), handler);
+            } else {
+                SwapUtil.assignI2ISwaps(moreStacks, lessStacks, handler);
+            }
         }
 
         if (!areStacksEqual(SmoothSwapping.oldStacks, currentStacks)) {

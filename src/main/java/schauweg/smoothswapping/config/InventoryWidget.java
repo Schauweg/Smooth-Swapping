@@ -23,7 +23,7 @@ import schauweg.smoothswapping.SwapUtil;
 
 import static net.minecraft.client.gui.screen.ingame.HandledScreen.drawSlotHighlight;
 import static schauweg.smoothswapping.SmoothSwapping.*;
-import static schauweg.smoothswapping.SwapUtil.addInventorySwap;
+import static schauweg.smoothswapping.SwapUtil.addI2IInventorySwap;
 
 @SuppressWarnings("SuspiciousNameCombination")
 public class InventoryWidget extends ClickableWidget {
@@ -172,7 +172,7 @@ public class InventoryWidget extends ClickableWidget {
             SwapUtil.updateStacks(currentStacks, oldStacks);
             slot.setStack(focusedSlot.getStack());
             focusedSlot.setStack(ItemStack.EMPTY);
-            addInventorySwap(slot.getIndex(), focusedSlot, slot, false, slot.getStack().getCount());
+            addI2IInventorySwap(slot.getIndex(), focusedSlot, slot, false, slot.getStack().getCount());
             return true;
         }
         return false;

@@ -75,7 +75,7 @@ public abstract class ItemRendererMixin {
                 for (int i = 0; i < swapList.size(); i++) {
                     InventorySwap swap = swapList.get(i);
 
-                    swap.setRenderDestinationSlot(swap.isChecked());
+                    swap.setRenderDestinationSlot(index != -1 && swap.isChecked());
 
                     if (!swap.renderDestinationSlot()) {
                         renderDestinationSlot = false;
