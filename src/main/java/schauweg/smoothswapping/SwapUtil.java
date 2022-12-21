@@ -1,6 +1,5 @@
 package schauweg.smoothswapping;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.PI;
+import static schauweg.smoothswapping.SmoothSwapping.ASSUME_CURSOR_STACK_SLOT_INDEX;
 
 public class SwapUtil {
 
@@ -59,20 +59,18 @@ public class SwapUtil {
         SmoothSwapping.swaps.put(index, swaps);
     }
 
-    public static void assignI2CSwaps(MinecraftClient client, List<SwapStacks> lessStacks, Vec2 mousePos, ScreenHandler handler) {
+    public static void assignI2CSwaps(List<SwapStacks> lessStacks, Vec2 mousePos, ScreenHandler handler) {
         ItemStack cursorStack = handler.getCursorStack();
 
         for (SwapStacks lessStack : lessStacks) {
             Slot lessSlot = handler.getSlot(lessStack.getSlotID());
-            // we assume that -1 is the cursor slot id
-            int cursorSlotIndex = -1;
-            List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(cursorSlotIndex, new ArrayList<>());
+            List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(ASSUME_CURSOR_STACK_SLOT_INDEX, new ArrayList<>());
 
             if (ItemStack.areItemsEqual(cursorStack, Items.AIR.getDefaultStack()))
                 return;
 
-            swaps.add(new ItemToCursorInventorySwap(lessSlot, mousePos, cursorStack, false, lessStack.itemCountToChange));
-            SmoothSwapping.swaps.put(cursorSlotIndex, swaps);
+            swaps.add(new ItemToCursorInventorySwap(lessSlot, mousePos, lessStack.getOldStack(), false, lessStack.itemCountToChange));
+            SmoothSwapping.swaps.put(ASSUME_CURSOR_STACK_SLOT_INDEX, swaps);
         }
     }
 
@@ -114,9 +112,9 @@ public class SwapUtil {
         return ItemStack.areItemsEqual(stack, Items.AIR.getDefaultStack()) ? 0 : stack.getCount();
     }
 
-    public static void updateStacks(DefaultedList<ItemStack> newStacks, DefaultedList<ItemStack> oldStacks) {
-        oldStacks.clear();
-        newStacks.stream().map(ItemStack::copy).forEach(oldStacks::add);
+    public static void copyStacks(DefaultedList<ItemStack> src, DefaultedList<ItemStack> dst) {
+        dst.clear();
+        src.stream().map(ItemStack::copy).forEach(dst::add);
     }
 
 }

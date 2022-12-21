@@ -77,4 +77,20 @@ public class InventorySwap {
     public ItemStack getSwapItem() {
         return swapItem;
     }
+
+    @Override
+    public String toString() {
+        return "InventorySwap{" +
+                "x=" + x +
+                ", y=" + y +
+                ", distance=" + distance +
+                ", startX=" + startX +
+                ", startY=" + startY +
+                ", angle=" + angle +
+                ", renderDestinationSlot=" + renderDestinationSlot +
+                ", checked=" + checked +
+                ", amount=" + amount +
+                ", swapItem=" + swapItem +
+                '}';
+    }
 }

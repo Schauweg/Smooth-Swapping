@@ -21,6 +21,8 @@ public class SmoothSwapping implements ClientModInitializer {
     
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
+    public static final int ASSUME_CURSOR_STACK_SLOT_INDEX = -2;
+
     public static boolean clickSwap;
 
     public static Integer clickSwapStack;

@@ -22,9 +22,8 @@ import schauweg.smoothswapping.config.ConfigManager;
 
 import java.util.*;
 
-import static schauweg.smoothswapping.SmoothSwapping.*;
 import static schauweg.smoothswapping.SwapUtil.getCount;
-import static schauweg.smoothswapping.SwapUtil.updateStacks;
+import static schauweg.smoothswapping.SwapUtil.copyStacks;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin {
@@ -55,25 +54,25 @@ public abstract class HandledScreenMixin {
             return;
         }
 
-        currentStacks = client.player.currentScreenHandler.getStacks();
+        SmoothSwapping.currentStacks = client.player.currentScreenHandler.getStacks();
 
         Screen screen = client.currentScreen;
 
-        if (clickSwap) {
-            clickSwap = false;
-            updateStacks(currentStacks, oldStacks);
+        if (SmoothSwapping.clickSwap) {
+            SmoothSwapping.clickSwap = false;
+            copyStacks(SmoothSwapping.currentStacks, SmoothSwapping.oldStacks);
             return;
         }
 
         if (currentScreen != screen) {
             SmoothSwapping.swaps.clear();
-            updateStacks(currentStacks, oldStacks);
+            copyStacks(SmoothSwapping.currentStacks, SmoothSwapping.oldStacks);
             currentScreen = screen;
             return;
         }
 
-        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, currentStacks);
-        if (changedStacks.size() > 1 && !clickSwap) {
+        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks);
+        if (changedStacks.size() > 1 && !SmoothSwapping.clickSwap) {
 
             List<SwapStacks> moreStacks = new ArrayList<>();
             List<SwapStacks> lessStacks = new ArrayList<>();
@@ -94,20 +93,20 @@ public abstract class HandledScreenMixin {
             }
             if (SmoothSwapping.clickSwapStack != null){
                 lessStacks.clear();
-                ItemStack newStack = handler.getSlot(clickSwapStack).getStack();
-                ItemStack oldStack = SmoothSwapping.oldStacks.get(clickSwapStack);
-                lessStacks.add(new SwapStacks(clickSwapStack, oldStack, newStack, totalAmount));
+                ItemStack newStack = handler.getSlot(SmoothSwapping.clickSwapStack).getStack();
+                ItemStack oldStack = SmoothSwapping.oldStacks.get(SmoothSwapping.clickSwapStack);
+                lessStacks.add(new SwapStacks(SmoothSwapping.clickSwapStack, oldStack, newStack, totalAmount));
                 SmoothSwapping.clickSwapStack = null;
             }
             if (moreStacks.isEmpty()) {
-                SwapUtil.assignI2CSwaps(client, lessStacks, new Vec2(mouseX - x, mouseY - y), handler);
+                SwapUtil.assignI2CSwaps(lessStacks, new Vec2(mouseX - x, mouseY - y), handler);
             } else {
                 SwapUtil.assignI2ISwaps(moreStacks, lessStacks, handler);
             }
         }
 
-        if (!areStacksEqual(SmoothSwapping.oldStacks, currentStacks)) {
-            updateStacks(currentStacks, oldStacks);
+        if (!areStacksEqual(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks)) {
+            copyStacks(SmoothSwapping.currentStacks, SmoothSwapping.oldStacks);
         }
     }
 

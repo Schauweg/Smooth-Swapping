@@ -169,7 +169,7 @@ public class InventoryWidget extends ClickableWidget {
         Slot slot = slots.get(index);
         if (slot.getStack().isEmpty()) {
             SmoothSwapping.currentStacks = inventory.stacks;
-            SwapUtil.updateStacks(currentStacks, oldStacks);
+            SwapUtil.copyStacks(currentStacks, oldStacks);
             slot.setStack(focusedSlot.getStack());
             focusedSlot.setStack(ItemStack.EMPTY);
             addI2IInventorySwap(slot.getIndex(), focusedSlot, slot, false, slot.getStack().getCount());

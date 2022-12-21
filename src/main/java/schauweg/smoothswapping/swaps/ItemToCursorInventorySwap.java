@@ -1,13 +1,56 @@
 package schauweg.smoothswapping.swaps;
 
-import net.minecraft.client.Mouse;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
-import schauweg.smoothswapping.SmoothSwapping;
 import schauweg.smoothswapping.Vec2;
 
 public class ItemToCursorInventorySwap extends InventorySwap {
-    public ItemToCursorInventorySwap(Slot fromSlot, Vec2 relativeCursorPos, ItemStack cursorSlot, boolean checked, int amount) {
-        super(new Vec2(fromSlot.x, fromSlot.y), relativeCursorPos, cursorSlot, checked, amount);
+    private boolean startedRender;
+    private int copiedStackHash;
+    private int targetStackHash;
+    private boolean arrived;
+
+    public ItemToCursorInventorySwap(Slot fromSlot, Vec2 relativeCursorPos, ItemStack fromStack, boolean checked, int amount) {
+        // slot has fixed size: 16
+        // defined in net.minecraft.client.gui.screen.ingame.HandledScreen#drawSlot(
+        //      net.minecraft.client.util.math.MatrixStack matrices,
+        //      net.minecraft.screen.slot.Slot slot
+        // )
+        super(new Vec2(fromSlot.x + 8, fromSlot.y + 8), relativeCursorPos, fromStack, checked, amount);
+        startedRender = false;
+        arrived = false;
+        targetStackHash = -1;
+    }
+
+    public boolean isStartedRender() {
+        return startedRender;
+    }
+
+    public void setStartedRender(boolean startedRender) {
+        this.startedRender = startedRender;
+    }
+
+    public int getCopiedStackHash() {
+        return copiedStackHash;
+    }
+
+    public void setCopiedStackHash(int copiedStackHash) {
+        this.copiedStackHash = copiedStackHash;
+    }
+
+    public int getTargetStackHash() {
+        return targetStackHash;
+    }
+
+    public void setTargetStackHash(int targetStackHash) {
+        this.targetStackHash = targetStackHash;
+    }
+
+    public boolean isArrived() {
+        return arrived;
+    }
+
+    public void setArrived(boolean arrived) {
+        this.arrived = arrived;
     }
 }
