@@ -1,9 +1,11 @@
 package schauweg.smoothswapping.mixin;
 
 import java.util.List;
+import java.util.function.Function;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -11,6 +13,8 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.util.collection.DefaultedList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,7 +27,9 @@ import schauweg.smoothswapping.SmoothSwapping;
 import schauweg.smoothswapping.SwapUtil;
 import schauweg.smoothswapping.config.Config;
 import schauweg.smoothswapping.config.ConfigManager;
+import schauweg.smoothswapping.swaps.ItemToCursorInventorySwap;
 
+import static schauweg.smoothswapping.SmoothSwapping.ASSUME_CURSOR_STACK_SLOT_INDEX;
 import static schauweg.smoothswapping.SwapUtil.*;
 
 @Mixin(ItemRenderer.class)
@@ -57,7 +63,7 @@ public abstract class ItemRendererMixin {
         doOverlayRender((ItemRenderer) (Object) this, stack, renderer, x, y, cbi);
     }
 
-    private void doSwap(MinecraftClient client, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, float zOffset, CallbackInfo ci) {
+    private void doSwap(MinecraftClient client, ItemStack stack, ModelTransformation.Mode renderMode, boolean leftHanded, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, BakedModel model, float zOffset, CallbackInfo cbi) {
 
         float lastFrameDuration = client.getLastFrameDuration();
         ItemRenderer renderer = (ItemRenderer) (Object) this;
@@ -82,6 +88,7 @@ public abstract class ItemRendererMixin {
                     }
 
                     //render swap
+                    //LOGGER.info("render i2i swap, stack hash: " + stack.hashCode());
                     renderSwap(renderer, swap, lastFrameDuration, stack.copy(), leftHanded, vertexConsumers, light, overlay, model, zOffset);
 
                     if (hasArrived(swap)) {
@@ -97,12 +104,68 @@ public abstract class ItemRendererMixin {
                 if (swapList.size() == 0)
                     SmoothSwapping.swaps.remove(index);
 
-                ci.cancel();
+                cbi.cancel();
+            } else if (SmoothSwapping.swaps.containsKey(ASSUME_CURSOR_STACK_SLOT_INDEX)) {
+                List<InventorySwap> swapList = SmoothSwapping.swaps
+                        .get(ASSUME_CURSOR_STACK_SLOT_INDEX)
+                        .stream().filter(swap -> !((ItemToCursorInventorySwap)swap).isArrived())
+                        .toList();
+
+                if (!swapList.isEmpty()) {
+                    if (swapListIndexOf(swapList, (swap) -> ((ItemToCursorInventorySwap) swap).getCopiedStackHash() == stack.hashCode()) == -1) {
+                        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                        ScreenHandler handler = null;
+                        if (player != null) handler = player.currentScreenHandler;
+                        //LOGGER.info("cursor stack hash: " + handler.getCursorStack().hashCode());
+
+                        for (InventorySwap inventorySwap : swapList) { // assign initial renders
+                            ItemToCursorInventorySwap swap = (ItemToCursorInventorySwap) inventorySwap;
+
+                            if (!swap.isStartedRender()) {
+                                //LOGGER.info("i2c start render " + swap.getSwapItem() +  ", hash=" + swap.getSwapItem().hashCode());
+                                swap.setStartedRender(true);
+                            } else if (!swap.isArrived()) {
+                                if (handler != null) {
+                                    DefaultedList<ItemStack> inventoryStacks = handler.getStacks();
+                                    //LOGGER.info("render stack: [" + stack +  ", " + stack.hashCode() + "], inventory stacks:" + sb);
+                                    //LOGGER.info("target stack hash: " + swap.getTargetStackHash() + ", cursor stack hash: " + handler.getCursorStack().hashCode());
+                                    if (swap.getTargetStackHash() == -1 || handler.getCursorStack().hashCode() == swap.getTargetStackHash()) {
+                                        if (!inventoryStacks.contains(stack)) { // now rendering cursor stack from parent
+                                            ItemStack copiedStack = swap.getSwapItem().copy();
+                                            swap.setCopiedStackHash(copiedStack.hashCode());
+                                            if (swap.getTargetStackHash() == -1) swap.setTargetStackHash(stack.hashCode());
+                                            //LOGGER.info("i2c insert render on " + stack + " to render " + swap.getSwapItem() + ", hash=" + swap.getSwapItem().hashCode());
+                                            renderSwap(renderer, swap, lastFrameDuration, copiedStack, leftHanded, vertexConsumers, light, overlay, model, zOffset);
+
+                                            if (hasArrived(swap)) swap.setArrived(true);
+                                        }
+                                    } else {
+                                        swap.setArrived(true);
+                                        //LOGGER.info("cursor stack has changed, enforcing to arrive");
+                                    }
+
+                                }
+                            }
+                        }
+                    } /*else LOGGER.info("i2c real render: " + stack + ", hash=" + stack.hashCode());*/
+                }
+
+                if (swapList.stream().allMatch(swap -> ((ItemToCursorInventorySwap)swap).isArrived()))
+                    SmoothSwapping.swaps.remove(ASSUME_CURSOR_STACK_SLOT_INDEX);
             }
         } catch (StackOverflowError e) {
             SmoothSwapping.LOGGER.warn("StackOverflowError just happened while trying to render an item swap. This message is a reminder to properly fix an issue #4 described on SmoothSwapping's GitHub");
             SmoothSwapping.swaps.remove(index);
+            SmoothSwapping.swaps.remove(ASSUME_CURSOR_STACK_SLOT_INDEX);
+
         }
+    }
+
+    private static int swapListIndexOf(List<InventorySwap> list, Function<InventorySwap, Boolean> prediction) {
+        for (int i = 0; i < list.size(); i++) {
+            if(prediction.apply(list.get(i))) return i;
+        }
+        return -1;
     }
 
     private void doOverlayRender(ItemRenderer itemRenderer, ItemStack stack, TextRenderer renderer, int x, int y, CallbackInfo cbi) {
@@ -166,6 +229,7 @@ public abstract class ItemRendererMixin {
         } catch (StackOverflowError e) {
             SmoothSwapping.LOGGER.warn("StackOverflowError just happened while trying to render an overlay. This message is a reminder to properly fix an issue #4 described on SmoothSwapping's GitHub");
             SmoothSwapping.swaps.remove(index);
+            SmoothSwapping.swaps.remove(ASSUME_CURSOR_STACK_SLOT_INDEX);
         }
     }
 

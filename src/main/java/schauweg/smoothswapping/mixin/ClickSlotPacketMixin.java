@@ -20,7 +20,7 @@ import schauweg.smoothswapping.config.ConfigManager;
 
 import java.util.*;
 
-import static schauweg.smoothswapping.SwapUtil.addInventorySwap;
+import static schauweg.smoothswapping.SwapUtil.addI2IInventorySwap;
 
 @Mixin(ClickSlotC2SPacket.class)
 public class ClickSlotPacketMixin {
@@ -72,13 +72,13 @@ public class ClickSlotPacketMixin {
                         SmoothSwapping.swaps.remove(destinationSlotID);
                         //if mouse slot is output slot(crafting slot for example) and old destination stack is empty
                         if (!mouseHoverSlot.canTakePartial(player) && destinationSlot.canTakePartial(player) && SmoothSwapping.oldStacks.get(destinationSlotID).isEmpty()) {
-                            addInventorySwap(destinationSlotID, mouseHoverSlot, destinationSlot, false, destinationSlot.getStack().getCount());
+                            addI2IInventorySwap(destinationSlotID, mouseHoverSlot, destinationSlot, false, destinationSlot.getStack().getCount());
                         } else if (mouseHoverSlot.canTakePartial(player) && destinationSlot.canTakePartial(player)) {
                             if (destinationSlot.hasStack()) {
-                                addInventorySwap(destinationSlotID, mouseHoverSlot, destinationSlot, false, destinationSlot.getStack().getCount());
+                                addI2IInventorySwap(destinationSlotID, mouseHoverSlot, destinationSlot, false, destinationSlot.getStack().getCount());
                             }
                             if (mouseHoverSlot.hasStack()) {
-                                addInventorySwap(slot, destinationSlot, mouseHoverSlot, false, mouseHoverSlot.getStack().getCount());
+                                addI2IInventorySwap(slot, destinationSlot, mouseHoverSlot, false, mouseHoverSlot.getStack().getCount());
                             }
                         }
                     }
