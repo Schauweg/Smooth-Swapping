@@ -1,0 +1,10 @@
+{
+  "smoothswapping.config.menu": "平滑交换配置菜单",
+  "smoothswapping.config.general": "常规",
+  "smoothswapping.config.testinventory": "测试物品栏",
+  "smoothswapping.config.option.animationspeed": "动画速度",
+  "smoothswapping.config.option.animationspeed.speed": "速度",
+  "smoothswapping.config.option.animationspeed.reset": "重置",
+  "smoothswapping.config.save": "保存并退出",
+  "smoothswapping.config.exit": "退出"
+}
