@@ -28,7 +28,7 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 
         Collections.sort(this.points);
 
