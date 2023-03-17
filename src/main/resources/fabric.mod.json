@@ -21,14 +21,16 @@
     "smoothswapping.mixins.json"
   ],
   "contact": {
+    "homepage": "https://modrinth.com/mod/smooth-swapping",
     "sources": "https://github.com/Schauweg/Smooth-Swapping",
     "issues": "https://github.com/Schauweg/Smooth-Swapping/issues"
   },
   "license": "GPL-3.0",
   "depends": {
-    "fabricloader": ">=0.14.8",
+    "fabricloader": ">=0.14.17",
     "fabric": "*",
-    "minecraft": "1.19.x",
+    "modmenu": "*",
+    "minecraft": "1.19.4",
     "java": ">=17"
   }
 }

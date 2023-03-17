@@ -6,11 +6,14 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.collection.DefaultedList;
 import schauweg.smoothswapping.swaps.InventorySwap;
+import schauweg.smoothswapping.swaps.ItemToCursorInventorySwap;
+import schauweg.smoothswapping.swaps.ItemToItemInventorySwap;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.PI;
+import static schauweg.smoothswapping.SmoothSwapping.ASSUME_CURSOR_STACK_SLOT_INDEX;
 
 public class SwapUtil {
 
@@ -46,17 +49,32 @@ public class SwapUtil {
         return (in - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
     }
 
-    public static void addInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked, int amount) {
+    public static void addI2IInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked, int amount) {
         List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
 
         if (ItemStack.areItemsEqual(toSlot.getStack(), Items.AIR.getDefaultStack()))
             return;
 
-        swaps.add(new InventorySwap(fromSlot, toSlot, checked, amount));
+        swaps.add(new ItemToItemInventorySwap(fromSlot, toSlot, checked, amount));
         SmoothSwapping.swaps.put(index, swaps);
     }
 
-    public static void assignSwaps(List<SwapStacks> moreStacks, List<SwapStacks> lessStacks, ScreenHandler handler){
+    public static void assignI2CSwaps(List<SwapStacks> lessStacks, Vec2 mousePos, ScreenHandler handler) {
+        ItemStack cursorStack = handler.getCursorStack();
+
+        for (SwapStacks lessStack : lessStacks) {
+            Slot lessSlot = handler.getSlot(lessStack.getSlotID());
+            List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(ASSUME_CURSOR_STACK_SLOT_INDEX, new ArrayList<>());
+
+            if (ItemStack.areItemsEqual(cursorStack, Items.AIR.getDefaultStack()))
+                return;
+
+            swaps.add(new ItemToCursorInventorySwap(lessSlot, mousePos, lessStack.getOldStack(), false, lessStack.itemCountToChange));
+            SmoothSwapping.swaps.put(ASSUME_CURSOR_STACK_SLOT_INDEX, swaps);
+        }
+    }
+
+    public static void assignI2ISwaps(List<SwapStacks> moreStacks, List<SwapStacks> lessStacks, ScreenHandler handler){
         for (int i = 0; i < moreStacks.size(); i++) {
             SwapStacks moreStack = moreStacks.get(i);
             if (moreStack.itemCountToChange == 0){
@@ -78,7 +96,7 @@ public class SwapUtil {
                     }
 
                     Slot lessSlot = handler.getSlot(lessStack.getSlotID());
-                    addInventorySwap(moreStack.getSlotID(), lessSlot, moreSlot, ItemStack.areItemsEqual(moreStack.getOldStack(), moreStack.getNewStack()), amount);
+                    addI2IInventorySwap(moreStack.getSlotID(), lessSlot, moreSlot, ItemStack.areItemsEqual(moreStack.getOldStack(), moreStack.getNewStack()), amount);
                     if (lessStack.itemCountToChange == 0){
                         lessStacks.remove(lessStack);
                     }
@@ -94,9 +112,9 @@ public class SwapUtil {
         return ItemStack.areItemsEqual(stack, Items.AIR.getDefaultStack()) ? 0 : stack.getCount();
     }
 
-    public static void updateStacks(DefaultedList<ItemStack> newStacks, DefaultedList<ItemStack> oldStacks) {
-        oldStacks.clear();
-        newStacks.stream().map(ItemStack::copy).forEach(oldStacks::add);
+    public static void copyStacks(DefaultedList<ItemStack> src, DefaultedList<ItemStack> dst) {
+        dst.clear();
+        src.stream().map(ItemStack::copy).forEach(dst::add);
     }
 
 }

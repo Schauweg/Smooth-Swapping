@@ -1,10 +1,12 @@
 package schauweg.smoothswapping.config;
 
+import schauweg.smoothswapping.Vec2;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
-
+    private boolean toggleMod = true;
     private int animationSpeed = 100;
     private float[][] curvePoints = new float[][]{};
     public int getAnimationSpeed() {
@@ -47,5 +49,13 @@ public class Config {
         points.add(new Vec2(1, 1));
 
         return points;
+    }
+
+    public boolean getToggleMod(){
+        return toggleMod;
+    }
+
+    public void setToggleMod(Boolean value) {
+        toggleMod = value;
     }
 }

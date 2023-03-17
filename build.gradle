@@ -79,44 +79,44 @@ publishing {
 }
 
 import com.modrinth.minotaur.dependencies.ModDependency
+
 if (System.getenv().MODRINTH_TOKEN) modrinth {
-	projectId = project.modrinth_id
-	versionName = archivesBaseName
-	versionNumber = "${project.mod_version}-${project.minecraft_version}"
-	versionType = "beta"
-	uploadFile = tasks.remapJar
-	gameVersions = [project.minecraft_version]
-	loaders = ["fabric"]
-	dependencies = [
-			new ModDependency("fabric-api", "required"),
-			new ModDependency("cloth-config", "embedded"),
-			new ModDependency("modmenu", "optional")
-	]
+    projectId = project.modrinth_id
+    versionName = archivesBaseName
+    versionNumber = "${project.mod_version}-${project.minecraft_version}"
+    versionType = "beta"
+	changelog = CHANGELOG
+    uploadFile = tasks.remapJar
+	gameVersions = SUPPORTED_VERSIONS
+    loaders = ["fabric"]
+    dependencies {
+        required.project "fabric-api"
+        optional.project "modmenu"
+    }
 }
 
 if (System.getenv().CURSEFORGE_API_KEY) curseforge {
-	apiKey = System.getenv().CURSEFORGE_API_KEY
+    apiKey = System.getenv().CURSEFORGE_API_KEY
 
-	project {
-		id = project.curseforge_id
-		addGameVersion "Fabric"
-		for (final def cf_ver in SUPPORTED_VERSIONS) addGameVersion cf_ver
+    project {
+        id = project.curseforge_id
+        addGameVersion "Fabric"
+        for (final def cf_ver in SUPPORTED_VERSIONS) addGameVersion cf_ver
 
-		changelog = CHANGELOG
-		releaseType = "beta"
+        changelog = CHANGELOG
+        releaseType = "beta"
 
-		mainArtifact(remapJar) {
-			displayName = archivesBaseName
-			relations {
-				requiredDependency "fabric-api"
-				embeddedLibrary "cloth-config"
+        mainArtifact(remapJar) {
+            displayName = archivesBaseName
+            relations {
+                requiredDependency "fabric-api"
 
-				optionalDependency 'modmenu'
-			}
-		}
+                optionalDependency 'modmenu'
+            }
+        }
 
-		afterEvaluate { uploadTask.dependsOn(remapJar) }
-	}
+        afterEvaluate { uploadTask.dependsOn(remapJar) }
+    }
 
-	options { forgeGradleIntegration = false }
+    options { forgeGradleIntegration = false }
 }

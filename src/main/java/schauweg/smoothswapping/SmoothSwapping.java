@@ -6,6 +6,9 @@ import com.google.gson.GsonBuilder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
+
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -21,12 +24,17 @@ public class SmoothSwapping implements ClientModInitializer {
     
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
+    public static final int ASSUME_CURSOR_STACK_SLOT_INDEX = -2;
+
     public static boolean clickSwap;
 
     public static Integer clickSwapStack;
     
     public static Map<Integer, List<InventorySwap>> swaps;
     public static DefaultedList<ItemStack> oldStacks, currentStacks;
+    public static ItemStack oldCursorStack;
+    public static AtomicReference<ItemStack> currentCursorStack = new AtomicReference<>(null);
+    public static final ReentrantLock currentCursorStackLock = new ReentrantLock();
 
     @Override
     public void onInitializeClient() {

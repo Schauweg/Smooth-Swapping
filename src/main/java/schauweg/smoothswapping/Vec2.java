@@ -1,7 +1,8 @@
-package schauweg.smoothswapping.config;
+package schauweg.smoothswapping;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public class Vec2 implements Comparable<Vec2>{
     static double Resolution = 72;
     static int xoffset = 120;
@@ -9,9 +10,9 @@ public class Vec2 implements Comparable<Vec2>{
     public double[] v; // coordinates of the Point
 
     // No-argument constructor
-//    public Vec2() {
-//        this(0, 0);
-//    }
+    public Vec2() {
+        this(0, 0);
+    }
 
 
     // Constructor

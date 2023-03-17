@@ -1,6 +1,8 @@
 {
   "smoothswapping.config.menu": "Smooth Swapping Config Menu",
-  "smoothswapping.config.general": "General",
+  "smoothswapping.config.toggle": "Toggle Mod",
+  "smoothswapping.config.toggle.on": "Enabled",
+  "smoothswapping.config.toggle.off": "Disabled",
   "smoothswapping.config.testinventory": "Test Inventory",
   "smoothswapping.config.option.animationspeed": "Animation Speed",
   "smoothswapping.config.option.animationspeed.speed": "Speed",
