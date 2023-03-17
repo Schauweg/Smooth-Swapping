@@ -21,7 +21,6 @@ public class ConfigScreen extends Screen implements ConfigScreenFactory<Screen> 
     InventoryWidget inventoryWidget;
     Config config;
     SimpleOption<Integer> animationSpeedOption;
-
     SimpleOption<Boolean> toggleOption;
     private final int oldAnimationSpeed;
     Screen parentScreen;
@@ -57,8 +56,8 @@ public class ConfigScreen extends Screen implements ConfigScreenFactory<Screen> 
 
     @Override
     protected void init() {
-        this.addDrawableChild(toggleOption.createButton(MinecraftClient.getInstance().options, this.width / 2 - 94, height / 5 - 20, 188));
-        this.addDrawableChild(animationSpeedOption.createButton(MinecraftClient.getInstance().options, this.width / 2 - 94, this.height / 5 + 5, 188));
+        this.addDrawableChild(toggleOption.createWidget(MinecraftClient.getInstance().options, this.width / 2 - 94, height / 5 - 20, 188));
+        this.addDrawableChild(animationSpeedOption.createWidget(MinecraftClient.getInstance().options, this.width / 2 - 94, this.height / 5 + 5, 188));
         this.catmullRomWidget = new CatmullRomWidget(this.width / 2 - 84 - 10, this.height / 3, 64, 64, 12, 4, 4, config.getCurvePoints());
         this.inventoryWidget = new InventoryWidget(this.width / 2 + 10, this.height / 3, 3, 4, Text.translatable("smoothswapping.config.testinventory"));
         this.addDrawableChild(this.catmullRomWidget);
@@ -81,8 +80,8 @@ public class ConfigScreen extends Screen implements ConfigScreenFactory<Screen> 
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackgroundTexture(0);
-        DrawableHelper.drawCenteredText(matrices, textRenderer, title, this.width / 2, 10, 0xFFFFFFFF);
+        this.renderBackgroundTexture(matrices);
+        DrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, title, this.width / 2, 10, 0xFFFFFFFF);
         super.render(matrices, mouseX, mouseY, delta);
         config.setCurvePoints(catmullRomWidget.getPoints());
     }
