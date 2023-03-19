@@ -41,7 +41,9 @@ import static schauweg.smoothswapping.SwapUtil.*;
 @Mixin(ItemRenderer.class)
 public abstract class ItemRendererMixin {
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
 
     @Inject(method = "renderGuiItemModel", at = @At("HEAD"), cancellable = true)
     public void onRenderItem(MatrixStack matrices, ItemStack stack, int x, int y, BakedModel model, CallbackInfo cbi) {
@@ -265,7 +267,7 @@ public abstract class ItemRendererMixin {
         double renderX = -swap.getStartX() - Math.cos(angle) * swap.getDistance() * ease;
         double renderY = swap.getStartY() + Math.sin(angle) * swap.getDistance() * ease;
 
-        matrices.translate((float)xPos, (float)yPos, 100.0F);
+        matrices.translate((float) xPos, (float) yPos, 100.0F);
         matrices.translate(8.0F, 8.0F, 0.0F);
         matrices.multiplyPositionMatrix(positionMatrix);
         matrices.multiplyPositionMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
