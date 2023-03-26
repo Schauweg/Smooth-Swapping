@@ -55,7 +55,11 @@ public abstract class ItemRendererMixin {
             return;
 
 
-        doSwap(stack, matrices, model, x, y, cbi);
+        try {
+            doSwap(stack, matrices, model, x, y, cbi);
+        } catch (Exception e) {
+            SwapUtil.reset();
+        }
     }
 
     @Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At(value = "HEAD"), cancellable = true)
@@ -66,109 +70,106 @@ public abstract class ItemRendererMixin {
         if (z.round().x <= 0 && !(client.currentScreen instanceof ConfigScreen))
             return;
 
-        doOverlayRender((ItemRenderer) (Object) this, matrices, stack, renderer, x, y, cbi);
+        try {
+            doOverlayRender((ItemRenderer) (Object) this, matrices, stack, renderer, x, y, cbi);
+        } catch (Exception e) {
+            SwapUtil.reset();
+        }
     }
 
 
-    private void doSwap(ItemStack stack, MatrixStack matrices, BakedModel model, int x, int y, CallbackInfo cbi) {
+    private void doSwap(ItemStack stack, MatrixStack matrices, BakedModel model, int x, int y, CallbackInfo cbi) throws StackOverflowError {
 
         float lastFrameDuration = client.getLastFrameDuration();
         ItemRenderer renderer = (ItemRenderer) (Object) this;
         int index = getSlotIndex(stack);
 
         // TODO proper fix (https://github.com/Schauweg/Smooth-Swapping/issues/4)
-        try {
-            if (SmoothSwapping.swaps.containsKey(index)) {
-                //Get all swaps for one slot
+        if (SmoothSwapping.swaps.containsKey(index)) {
+            //Get all swaps for one slot
 
 
-                List<InventorySwap> swapList = SmoothSwapping.swaps.get(index);
+            List<InventorySwap> swapList = SmoothSwapping.swaps.get(index);
 
-                boolean renderDestinationSlot = true;
+            boolean renderDestinationSlot = true;
 
-                //render all swaps for one slot
-                for (int i = 0; i < swapList.size(); i++) {
-                    InventorySwap swap = swapList.get(i);
+            //render all swaps for one slot
+            for (int i = 0; i < swapList.size(); i++) {
+                InventorySwap swap = swapList.get(i);
 
-                    swap.setRenderDestinationSlot(swap.isChecked());
+                swap.setRenderDestinationSlot(swap.isChecked());
 
-                    if (!swap.renderDestinationSlot()) {
-                        renderDestinationSlot = false;
-                    }
-
-                    //render swap
-                    //LOGGER.info("render i2i swap, stack hash: " + stack.hashCode());
-
-                    renderSwap(renderer, swap, lastFrameDuration, stack.copy(), x, y, matrices.peek().getPositionMatrix(), model);
-
-                    if (hasArrived(swap)) {
-                        setRenderToTrue(swapList);
-                        swapList.remove(swap);
-                    }
+                if (!swap.renderDestinationSlot()) {
+                    renderDestinationSlot = false;
                 }
 
-                //whether the destination slot should be rendered
-                if (renderDestinationSlot) {
-                    renderer.renderGuiItemIcon(matrices, stack.copy(), x, y);
+                //render swap
+                //LOGGER.info("render i2i swap, stack hash: " + stack.hashCode());
+
+                renderSwap(renderer, swap, lastFrameDuration, stack.copy(), x, y, matrices.peek().getPositionMatrix(), model);
+
+                if (hasArrived(swap)) {
+                    setRenderToTrue(swapList);
+                    swapList.remove(swap);
                 }
-                if (swapList.size() == 0)
-                    SmoothSwapping.swaps.remove(index);
+            }
 
-                cbi.cancel();
-            } else if (SmoothSwapping.swaps.containsKey(ASSUME_CURSOR_STACK_SLOT_INDEX)) {
-                List<InventorySwap> swapList = SmoothSwapping.swaps
-                        .get(ASSUME_CURSOR_STACK_SLOT_INDEX)
-                        .stream().filter(swap -> !((ItemToCursorInventorySwap) swap).isArrived())
-                        .toList();
+            //whether the destination slot should be rendered
+            if (renderDestinationSlot) {
+                renderer.renderGuiItemIcon(matrices, stack.copy(), x, y);
+            }
+            if (swapList.size() == 0)
+                SmoothSwapping.swaps.remove(index);
 
-                if (!swapList.isEmpty()) {
-                    if (swapListIndexOf(swapList, (swap) -> ((ItemToCursorInventorySwap) swap).getCopiedStackHash() == stack.hashCode()) == -1) {
-                        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                        ScreenHandler handler = null;
-                        if (player != null) handler = player.currentScreenHandler;
-                        //LOGGER.info("cursor stack hash: " + handler.getCursorStack().hashCode());
+            cbi.cancel();
+        } else if (SmoothSwapping.swaps.containsKey(ASSUME_CURSOR_STACK_SLOT_INDEX)) {
+            List<InventorySwap> swapList = SmoothSwapping.swaps
+                    .get(ASSUME_CURSOR_STACK_SLOT_INDEX)
+                    .stream().filter(swap -> !((ItemToCursorInventorySwap) swap).isArrived())
+                    .toList();
 
-                        for (InventorySwap inventorySwap : swapList) { // assign initial renders
-                            ItemToCursorInventorySwap swap = (ItemToCursorInventorySwap) inventorySwap;
+            if (!swapList.isEmpty()) {
+                if (swapListIndexOf(swapList, (swap) -> ((ItemToCursorInventorySwap) swap).getCopiedStackHash() == stack.hashCode()) == -1) {
+                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                    ScreenHandler handler = null;
+                    if (player != null) handler = player.currentScreenHandler;
+                    //LOGGER.info("cursor stack hash: " + handler.getCursorStack().hashCode());
 
-                            if (!swap.isStartedRender()) {
-                                //LOGGER.info("i2c start render " + swap.getSwapItem() +  ", hash=" + swap.getSwapItem().hashCode());
-                                swap.setStartedRender(true);
-                            } else if (!swap.isArrived()) {
-                                if (handler != null) {
-                                    DefaultedList<ItemStack> inventoryStacks = handler.getStacks();
-                                    //LOGGER.info("render stack: [" + stack +  ", " + stack.hashCode() + "], inventory stacks:" + sb);
-                                    //LOGGER.info("target stack hash: " + swap.getTargetStackHash() + ", cursor stack hash: " + handler.getCursorStack().hashCode());
-                                    if (swap.getTargetStackHash() == -1 || handler.getCursorStack().hashCode() == swap.getTargetStackHash()) {
-                                        if (!inventoryStacks.contains(stack)) { // now rendering cursor stack from parent
-                                            ItemStack copiedStack = swap.getSwapItem().copy();
-                                            swap.setCopiedStackHash(copiedStack.hashCode());
-                                            if (swap.getTargetStackHash() == -1)
-                                                swap.setTargetStackHash(stack.hashCode());
-                                            //LOGGER.info("i2c insert render on " + stack + " to render " + swap.getSwapItem() + ", hash=" + swap.getSwapItem().hashCode());
-                                            renderSwap(renderer, swap, lastFrameDuration, copiedStack, x, y, matrices.peek().getPositionMatrix(), model);
+                    for (InventorySwap inventorySwap : swapList) { // assign initial renders
+                        ItemToCursorInventorySwap swap = (ItemToCursorInventorySwap) inventorySwap;
 
-                                            if (hasArrived(swap)) swap.setArrived(true);
-                                        }
-                                    } else {
-                                        swap.setArrived(true);
-                                        //LOGGER.info("cursor stack has changed, enforcing to arrive");
+                        if (!swap.isStartedRender()) {
+                            //LOGGER.info("i2c start render " + swap.getSwapItem() +  ", hash=" + swap.getSwapItem().hashCode());
+                            swap.setStartedRender(true);
+                        } else if (!swap.isArrived()) {
+                            if (handler != null) {
+                                DefaultedList<ItemStack> inventoryStacks = handler.getStacks();
+                                //LOGGER.info("render stack: [" + stack +  ", " + stack.hashCode() + "], inventory stacks:" + sb);
+                                //LOGGER.info("target stack hash: " + swap.getTargetStackHash() + ", cursor stack hash: " + handler.getCursorStack().hashCode());
+                                if (swap.getTargetStackHash() == -1 || handler.getCursorStack().hashCode() == swap.getTargetStackHash()) {
+                                    if (!inventoryStacks.contains(stack)) { // now rendering cursor stack from parent
+                                        ItemStack copiedStack = swap.getSwapItem().copy();
+                                        swap.setCopiedStackHash(copiedStack.hashCode());
+                                        if (swap.getTargetStackHash() == -1)
+                                            swap.setTargetStackHash(stack.hashCode());
+                                        //LOGGER.info("i2c insert render on " + stack + " to render " + swap.getSwapItem() + ", hash=" + swap.getSwapItem().hashCode());
+                                        renderSwap(renderer, swap, lastFrameDuration, copiedStack, x, y, matrices.peek().getPositionMatrix(), model);
+
+                                        if (hasArrived(swap)) swap.setArrived(true);
                                     }
-
+                                } else {
+                                    swap.setArrived(true);
+                                    //LOGGER.info("cursor stack has changed, enforcing to arrive");
                                 }
+
                             }
                         }
-                    } /*else LOGGER.info("i2c real render: " + stack + ", hash=" + stack.hashCode());*/
-                }
-
-                if (swapList.stream().allMatch(swap -> ((ItemToCursorInventorySwap) swap).isArrived()))
-                    SmoothSwapping.swaps.remove(ASSUME_CURSOR_STACK_SLOT_INDEX);
+                    }
+                } /*else LOGGER.info("i2c real render: " + stack + ", hash=" + stack.hashCode());*/
             }
-        } catch (StackOverflowError e) {
-            SmoothSwapping.LOGGER.warn("StackOverflowError just happened while trying to render an item swap. This message is a reminder to properly fix an issue #4 described on SmoothSwapping's GitHub");
-            SmoothSwapping.swaps.remove(index);
-            SmoothSwapping.swaps.remove(ASSUME_CURSOR_STACK_SLOT_INDEX);
 
+            if (swapList.stream().allMatch(swap -> ((ItemToCursorInventorySwap) swap).isArrived()))
+                SmoothSwapping.swaps.remove(ASSUME_CURSOR_STACK_SLOT_INDEX);
         }
     }
 
@@ -180,72 +181,65 @@ public abstract class ItemRendererMixin {
         return -1;
     }
 
-    private void doOverlayRender(ItemRenderer itemRenderer, MatrixStack matrices, ItemStack stack, TextRenderer renderer, int x, int y, CallbackInfo cbi) {
+    private void doOverlayRender(ItemRenderer itemRenderer, MatrixStack matrices, ItemStack stack, TextRenderer renderer, int x, int y, CallbackInfo cbi) throws StackOverflowError {
         int index = getSlotIndex(stack);
 
-        // TODO proper fix (https://github.com/Schauweg/Smooth-Swapping/issues/4)
-        try {
-            if (SmoothSwapping.swaps.containsKey(index)) {
-                List<InventorySwap> swapList = SmoothSwapping.swaps.get(index);
-                Config config = ConfigManager.getConfig();
-                int stackCount = stack.getCount();
-                boolean renderToSlot = true;
+        if (SmoothSwapping.swaps.containsKey(index)) {
+            List<InventorySwap> swapList = SmoothSwapping.swaps.get(index);
+            Config config = ConfigManager.getConfig();
+            int stackCount = stack.getCount();
+            boolean renderToSlot = true;
 
-                for (InventorySwap swap : swapList) {
+            for (InventorySwap swap : swapList) {
 
-                    if (!ItemStack.areItemsEqual(stack, swap.getSwapItem())) {
-                        SmoothSwapping.swaps.remove(index);
-                        return;
-                    }
-
-                    stackCount -= swap.getAmount();
-                    if (!swap.renderDestinationSlot()) {
-                        renderToSlot = false;
-                    }
-
-                    if (swap.getAmount() > 1 || stack.isItemBarVisible()) {
-                        String amount = String.valueOf(swap.getAmount());
-                        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-
-                        MatrixStack textMatrices = new MatrixStack();
-                        textMatrices.push();
-
-                        double swapX = swap.getX();
-                        double swapY = swap.getY();
-                        double angle = swap.getAngle();
-
-                        double progress = 1D - SwapUtil.map(Math.hypot(swapX, swapY), 0, swap.getDistance(), 1D, 0D);
-
-                        List<CatmullRomWidget.CatmullRomSpline> splines = config.getSplines();
-
-                        double ease = CatmullRomWidget.getProgress(progress, splines);
-
-                        double renderX = -swap.getStartX() - (Math.cos(angle) * swap.getDistance() * ease);
-                        double renderY = swap.getStartY() + (Math.sin(angle) * swap.getDistance() * ease);
-
-                        textMatrices.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
-                        textMatrices.translate(renderX, -renderY, 350);
-
-                        if (stack.isItemBarVisible())
-                            itemRenderer.renderGuiItemOverlay(textMatrices, renderer, stack.copy(), x, y, null);
-                        else
-                            itemRenderer.renderGuiItemOverlay(textMatrices, renderer, stack.copy(), x, y, amount);
-
-                        immediate.draw();
-                        textMatrices.pop();
-                    }
-
+                if (!ItemStack.areItemsEqual(stack, swap.getSwapItem())) {
+                    SmoothSwapping.swaps.remove(index);
+                    return;
                 }
 
-                if (renderToSlot && stackCount > 1) {
-                    itemRenderer.renderGuiItemOverlay(matrices, renderer, stack.copy(), x, y, String.valueOf(stackCount));
+                stackCount -= swap.getAmount();
+                if (!swap.renderDestinationSlot()) {
+                    renderToSlot = false;
                 }
-                cbi.cancel();
+
+                if (swap.getAmount() > 1 || stack.isItemBarVisible()) {
+                    String amount = String.valueOf(swap.getAmount());
+                    VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+
+                    MatrixStack textMatrices = new MatrixStack();
+                    textMatrices.push();
+
+                    double swapX = swap.getX();
+                    double swapY = swap.getY();
+                    double angle = swap.getAngle();
+
+                    double progress = 1D - SwapUtil.map(Math.hypot(swapX, swapY), 0, swap.getDistance(), 1D, 0D);
+
+                    List<CatmullRomWidget.CatmullRomSpline> splines = config.getSplines();
+
+                    double ease = CatmullRomWidget.getProgress(progress, splines);
+
+                    double renderX = -swap.getStartX() - (Math.cos(angle) * swap.getDistance() * ease);
+                    double renderY = swap.getStartY() + (Math.sin(angle) * swap.getDistance() * ease);
+
+                    textMatrices.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
+                    textMatrices.translate(renderX, -renderY, 350);
+
+                    if (stack.isItemBarVisible())
+                        itemRenderer.renderGuiItemOverlay(textMatrices, renderer, stack.copy(), x, y, null);
+                    else
+                        itemRenderer.renderGuiItemOverlay(textMatrices, renderer, stack.copy(), x, y, amount);
+
+                    immediate.draw();
+                    textMatrices.pop();
+                }
+
             }
-        } catch (StackOverflowError e) {
-            SmoothSwapping.LOGGER.warn("StackOverflowError just happened while trying to render an overlay. This message is a reminder to properly fix an issue #4 described on SmoothSwapping's GitHub");
-            SmoothSwapping.swaps.remove(index);
-            SmoothSwapping.swaps.remove(ASSUME_CURSOR_STACK_SLOT_INDEX);
+
+            if (renderToSlot && stackCount > 1) {
+                itemRenderer.renderGuiItemOverlay(matrices, renderer, stack.copy(), x, y, String.valueOf(stackCount));
+            }
+            cbi.cancel();
         }
     }
 

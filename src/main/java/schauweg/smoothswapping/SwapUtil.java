@@ -117,4 +117,13 @@ public class SwapUtil {
         src.stream().map(ItemStack::copy).forEach(dst::add);
     }
 
+    public static void reset(){
+        SmoothSwapping.clickSwap = false;
+        SmoothSwapping.clickSwapStack = null;
+        SmoothSwapping.swaps.clear();
+        SmoothSwapping.oldStacks.clear();
+        SmoothSwapping.currentStacks.clear();
+        SmoothSwapping.oldCursorStack = null;
+    }
+
 }

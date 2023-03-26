@@ -41,6 +41,14 @@ public abstract class HandledScreenMixin {
 
     @Inject(method = "render", at = @At("HEAD"))
     public void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
+        try {
+            doRender(mouseX, mouseY);
+        } catch (Exception e) {
+            SwapUtil.reset();
+        }
+    }
+
+    private void doRender(double mouseX, double mouseY){
         if (!ConfigManager.getConfig().getToggleMod())
             return;
 
