@@ -90,11 +90,6 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    public boolean isMouseOver(double mouseX, double mouseY) {
-        return this.visible && mouseX >= (double) this.getX() && mouseX < (double) (this.getX() + this.width) && mouseY >= (double) this.getY() && mouseY < (double) (this.getY() + this.height);
-    }
-
-    @Override
     protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {
         if (hoveredPointIndex != null) {
             Vec2 hoveredPoint = this.points.get(hoveredPointIndex);
