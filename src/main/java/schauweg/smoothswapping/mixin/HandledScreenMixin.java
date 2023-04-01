@@ -134,8 +134,8 @@ public abstract class HandledScreenMixin {
                 //LOGGER.info("old cursor stack: " + oldCursorStack + ", current cursor stack: " + currentCursorStack);
                 if (
                         currentCursorStack != null && oldCursorStack != null
-                        && currentCursorStack.getItem() == oldCursorStack.getItem()
-                        && currentCursorStack.getCount() != oldCursorStack.getCount()
+                                && currentCursorStack.getItem() == oldCursorStack.getItem()
+                                && currentCursorStack.getCount() != oldCursorStack.getCount()
                 ) {
                     changedStacks.entrySet().stream().findFirst().ifPresent(changedStack -> {
                         ItemStack oldStack = SmoothSwapping.oldStacks.get(changedStack.getKey());
@@ -145,7 +145,7 @@ public abstract class HandledScreenMixin {
                         //LOGGER.info("old slot stack: " + oldStack + ", current slot stack: " + currentStack);
                         if (
                                 (oldStack.getItem() == currentStack.getItem() && oldStack.getCount() - currentStack.getCount() == cursorStackCountDiff)
-                                || currentStack.getItem() == Items.AIR
+                                        || currentStack.getItem() == Items.AIR
                         ) {
                             SwapStacks lessStack = new SwapStacks(changedStack.getKey(), oldStack, currentStack, getCount(oldStack) - getCount(currentStack));
                             SwapUtil.assignI2CSwaps(List.of(lessStack), new Vec2(mouseX - x, mouseY - y), handler);

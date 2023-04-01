@@ -17,7 +17,6 @@ import static schauweg.smoothswapping.SmoothSwapping.ASSUME_CURSOR_STACK_SLOT_IN
 
 public class SwapUtil {
 
-
     public static boolean hasArrived(InventorySwap swap) {
         int quadrant = getQuadrant(swap.getAngle());
         double x = swap.getX();
