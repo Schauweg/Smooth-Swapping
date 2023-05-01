@@ -1,38 +1,21 @@
-# gradle
-
-.gradle/
 build/
-out/
-classes/
-remappedSrc/
-
-# eclipse
-
-*.launch
-
-# idea
-
-.idea/
-*.iml
 *.ipr
+run/
 *.iws
-
-# vscode
-
-.settings/
-.vscode/
+out/
+*.iml
+.gradle/
+output/
 bin/
+libs/
+
 .classpath
 .project
-
-# macos
-
-*.DS_Store
-
-# fabric
-
-run/
-
-# other
+.idea/
+classes/
+.metadata
+.vscode
+.settings
+*.launch
 
 *.psd
