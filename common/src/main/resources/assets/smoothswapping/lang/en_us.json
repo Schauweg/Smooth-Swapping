@@ -1,0 +1,13 @@
+{
+  "smoothswapping.config.menu": "Smooth Swapping Config Menu",
+  "smoothswapping.config.toggle": "Toggle Mod",
+  "smoothswapping.config.toggle.on": "Enabled",
+  "smoothswapping.config.toggle.off": "Disabled",
+  "smoothswapping.config.testinventory": "Test Inventory",
+  "smoothswapping.config.option.animationspeed.tooltip": "-Right click on empty space to create new curve point\n-Left click and drag a point to move it\n-Right click one to delete it",
+  "smoothswapping.config.option.animationspeed": "Animation Speed",
+  "smoothswapping.config.option.animationspeed.speed": "Speed",
+  "smoothswapping.config.option.animationspeed.reset": "Reset",
+  "smoothswapping.config.save": "Save & Exit",
+  "smoothswapping.config.exit": "Exit"
+}

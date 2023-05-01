@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "smoothswapping",
+  "version": "${version}",
+  "name": "Smooth Swapping",
+  "description": "Moves the items in an inventory smoothly instead of instantly",
+  "authors": ["Schauweg"],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/smooth-swapping",
+    "sources": "https://github.com/Schauweg/Smooth-Swapping",
+    "issues": "https://github.com/Schauweg/Smooth-Swapping/issues"
+  },
+  "license": "GNU LGPL 3.0",
+  "icon": "assets/smoothswapping/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.shwg.smoothswapping.fabric.SmoothSwappingFabric"],
+    "modmenu": [
+      "dev.shwg.smoothswapping.fabric.modmenu.ModmenuIntegration"
+    ]
+  },
+  "mixins": [
+    "smoothswapping.mixins.json",
+    "smoothswapping-common.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "minecraft": ">=1.19.4"
+  }
+}
