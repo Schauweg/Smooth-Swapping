@@ -1,0 +1,13 @@
+{
+  "smoothswapping.config.menu": "Smooth Swapping 設定介面",
+  "smoothswapping.config.toggle": "開關模組",
+  "smoothswapping.config.toggle.on": "啟用",
+  "smoothswapping.config.toggle.off": "停用",
+  "smoothswapping.config.testinventory": "測試用物品欄",
+  "smoothswapping.config.option.animationspeed.tooltip": "-在空白處按右鍵以建立新的曲線點\n-按住左鍵並拖動點來移動它\n-按右鍵點擊一個點以刪除它",
+  "smoothswapping.config.option.animationspeed": "動畫速度",
+  "smoothswapping.config.option.animationspeed.speed": "速度",
+  "smoothswapping.config.option.animationspeed.reset": "重設",
+  "smoothswapping.config.save": "儲存並離開",
+  "smoothswapping.config.exit": "離開"
+}
