@@ -1,3 +1,2 @@
-### 0.9
-- Changed to Architectury so Forge version is now available
-- Added German translation
+### 0.9.1
+- Added traditional chinese translation (thanks to notlin4)
