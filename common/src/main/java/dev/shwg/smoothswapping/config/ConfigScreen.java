@@ -3,11 +3,10 @@ package dev.shwg.smoothswapping.config;
 import com.mojang.serialization.Codec;
 import dev.shwg.smoothswapping.Vec2;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.SimpleOption;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -78,10 +77,10 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackgroundTexture(matrices);
-        DrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, title, this.width / 2, 10, 0xFFFFFFFF);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackgroundTexture(context);
+        context.drawCenteredTextWithShadow(textRenderer, title, this.width / 2, 10, 0xFFFFFFFF);
+        super.render(context, mouseX, mouseY, delta);
         config.setCurvePoints(catmullRomWidget.getPoints());
     }
 

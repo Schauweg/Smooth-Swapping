@@ -6,6 +6,7 @@ import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
 import dev.shwg.smoothswapping.config.ConfigManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static dev.shwg.smoothswapping.SmoothSwapping.oldCursorStack;
 import static dev.shwg.smoothswapping.SwapUtil.getCount;
 
 @Mixin(HandledScreen.class)
@@ -42,7 +44,7 @@ public abstract class HandledScreenMixin {
     private Screen currentScreen = null;
 
     @Inject(method = "render", at = @At("HEAD"))
-    public void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo cbi) {
+    public void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         try {
             doRender(mouseX, mouseY);
         } catch (Exception e) {
@@ -50,7 +52,7 @@ public abstract class HandledScreenMixin {
         }
     }
 
-    private void doRender(double mouseX, double mouseY){
+    private void doRender(double mouseX, double mouseY) {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
 
@@ -111,14 +113,17 @@ public abstract class HandledScreenMixin {
                     ItemStack oldStack = SmoothSwapping.oldStacks.get(slotID);
 
                     //whether the stack got more items or less and if slot is output slot
-                    if (getCount(newStack) > getCount(oldStack) && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player)) {
+                    if (getCount(newStack) > getCount(oldStack)
+                            && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player)) {
                         moreStacks.add(new SwapStacks(slotID, oldStack, newStack, getCount(oldStack) - getCount(newStack)));
                         totalAmount += getCount(newStack) - getCount(oldStack);
-                    } else if (getCount(newStack) < getCount(oldStack) && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player) && SmoothSwapping.clickSwapStack == null) {
+                    } else if (getCount(newStack) < getCount(oldStack)
+                            && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player)
+                            && SmoothSwapping.clickSwapStack == null) {
                         lessStacks.add(new SwapStacks(slotID, oldStack, newStack, getCount(oldStack) - getCount(newStack)));
                     }
                 }
-                if (SmoothSwapping.clickSwapStack != null){
+                if (SmoothSwapping.clickSwapStack != null) {
                     lessStacks.clear();
                     ItemStack newStack = handler.getSlot(SmoothSwapping.clickSwapStack).getStack();
                     ItemStack oldStack = SmoothSwapping.oldStacks.get(SmoothSwapping.clickSwapStack);
@@ -159,7 +164,7 @@ public abstract class HandledScreenMixin {
 
         if (!areStacksEqual(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks)) {
             SwapUtil.copyStacks(SmoothSwapping.currentStacks, SmoothSwapping.oldStacks);
-            SmoothSwapping.oldCursorStack = SmoothSwapping.currentCursorStack.get();
+            oldCursorStack = SmoothSwapping.currentCursorStack.get();
         }
     }
 
@@ -189,7 +194,6 @@ public abstract class HandledScreenMixin {
         }
         return true;
     }
-
 
 
 }

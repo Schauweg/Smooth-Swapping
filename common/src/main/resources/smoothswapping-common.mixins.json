@@ -8,8 +8,8 @@
   "client": [
     "ClickableWidgetAccessor",
     "ClickSlotPacketMixin",
+    "DrawContextMixin",
     "HandledScreenMixin",
-    "ItemRendererMixin",
     "SimpleInventoryAccessor"
   ],
   "injectors": {

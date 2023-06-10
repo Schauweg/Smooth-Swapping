@@ -11,8 +11,10 @@ import net.minecraft.util.collection.DefaultedList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static dev.shwg.smoothswapping.SmoothSwapping.ASSUME_CURSOR_STACK_SLOT_INDEX;
+import static dev.shwg.smoothswapping.SmoothSwapping.currentStacks;
 import static java.lang.Math.PI;
 
 public class SwapUtil {
@@ -31,7 +33,12 @@ public class SwapUtil {
     }
 
     public static int getSlotIndex(ItemStack stack) {
-        return SmoothSwapping.currentStacks.indexOf(stack);
+        for (int i = 0; i < currentStacks.size(); i++) {
+            ItemStack s = currentStacks.get(i);
+            if (s.hashCode() == stack.hashCode())
+                return i;
+        }
+        return -1;
     }
 
     public static void setRenderToTrue(List<InventorySwap> swapList) {
@@ -114,6 +121,13 @@ public class SwapUtil {
     public static void copyStacks(DefaultedList<ItemStack> src, DefaultedList<ItemStack> dst) {
         dst.clear();
         src.stream().map(ItemStack::copy).forEach(dst::add);
+    }
+
+    public static int swapListIndexOf(List<InventorySwap> list, Function<InventorySwap, Boolean> prediction) {
+        for (int i = 0; i < list.size(); i++) {
+            if (prediction.apply(list.get(i))) return i;
+        }
+        return -1;
     }
 
     public static void reset(){
