@@ -1,7 +1,10 @@
 {
-  "smoothswapping.config.menu": "平滑转移配置菜单",
-  "smoothswapping.config.general": "通用",
+  "smoothswapping.config.menu": "平滑转移 配置菜单",
+  "smoothswapping.config.toggle": "开关模组",
+  "smoothswapping.config.toggle.on": "启用",
+  "smoothswapping.config.toggle.off": "禁用",
   "smoothswapping.config.testinventory": "测试物品栏",
+  "smoothswapping.config.option.animationspeed.tooltip": "-右击空白处以创建新曲线点\n-左击并拖动一点来移动它\n-右击一点将其删除",
   "smoothswapping.config.option.animationspeed": "动画速度",
   "smoothswapping.config.option.animationspeed.speed": "速度",
   "smoothswapping.config.option.animationspeed.reset": "重置",
