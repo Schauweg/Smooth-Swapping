@@ -10,7 +10,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
@@ -18,6 +17,7 @@ import net.minecraft.util.collection.DefaultedList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,18 +41,20 @@ public abstract class HandledScreenMixin {
     @Shadow
     protected int x, y;
 
-    private Screen currentScreen = null;
+    @Unique
+    private Screen smooth_Swapping$currentScreen = null;
 
     @Inject(method = "render", at = @At("HEAD"))
     public void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         try {
-            doRender(mouseX, mouseY);
+            smooth_Swapping$doRender(mouseX, mouseY);
         } catch (Exception e) {
             SwapUtil.reset();
         }
     }
 
-    private void doRender(double mouseX, double mouseY) {
+    @Unique
+    private void smooth_Swapping$doRender(double mouseX, double mouseY) {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
 
@@ -92,14 +94,14 @@ public abstract class HandledScreenMixin {
             return;
         }
 
-        if (currentScreen != screen) {
+        if (smooth_Swapping$currentScreen != screen) {
             SmoothSwapping.swaps.clear();
             SwapUtil.copyStacks(SmoothSwapping.currentStacks, SmoothSwapping.oldStacks);
-            currentScreen = screen;
+            smooth_Swapping$currentScreen = screen;
             return;
         }
 
-        Map<Integer, ItemStack> changedStacks = getChangedStacks(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks);
+        Map<Integer, ItemStack> changedStacks = smooth_Swapping$getChangedStacks(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks);
         if (!SmoothSwapping.clickSwap) {
             int changedStacksSize = changedStacks.size();
             if (changedStacksSize > 1) {
@@ -162,13 +164,14 @@ public abstract class HandledScreenMixin {
             }
         }
 
-        if (!areStacksEqual(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks)) {
+        if (!smooth_Swapping$areStacksEqual(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks)) {
             SwapUtil.copyStacks(SmoothSwapping.currentStacks, SmoothSwapping.oldStacks);
             oldCursorStack = SmoothSwapping.currentCursorStack.get();
         }
     }
 
-    private Map<Integer, ItemStack> getChangedStacks(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
+    @Unique
+    private Map<Integer, ItemStack> smooth_Swapping$getChangedStacks(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
         Map<Integer, ItemStack> changedStacks = new HashMap<>();
         for (int slotID = 0; slotID < oldStacks.size(); slotID++) {
             ItemStack newStack = newStacks.get(slotID);
@@ -180,7 +183,8 @@ public abstract class HandledScreenMixin {
         return changedStacks;
     }
 
-    private boolean areStacksEqual(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
+    @Unique
+    private boolean smooth_Swapping$areStacksEqual(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
         if (oldStacks == null || newStacks == null || (oldStacks.size() != newStacks.size())) {
             return false;
         } else {
