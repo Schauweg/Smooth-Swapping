@@ -25,6 +25,7 @@ import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -49,16 +50,17 @@ public abstract class DrawContextMixin {
 
     @Inject(method = "drawItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;IIII)V", at = @At("HEAD"), cancellable = true)
     public void onItemDraw(LivingEntity entity, World world, ItemStack stack, int x, int y, int seed, int z, CallbackInfo cbi) {
-        if (isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
+        if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
 
         try {
-            doSwap(stack, x, y, cbi);
+            smooth_Swapping$doSwap(stack, x, y, cbi);
         } catch (Exception e) {
             SwapUtil.reset();
         }
     }
 
-    private void doSwap(ItemStack stack, int x, int y, CallbackInfo cbi) throws Error {
+    @Unique
+    private void smooth_Swapping$doSwap(ItemStack stack, int x, int y, CallbackInfo cbi) throws Error {
         int index = SwapUtil.getSlotIndex(stack);
 
         if (SmoothSwapping.swaps.containsKey(index)) {
@@ -78,7 +80,7 @@ public abstract class DrawContextMixin {
                 }
 
                 //LOGGER.info("render i2i swap, stack hash: " + stack.hashCode());
-                renderSwap(swap, x, y, stack.copy());
+                smooth_Swapping$renderSwap(swap, x, y, stack.copy());
 
                 if (SwapUtil.hasArrived(swap)) {
                     SwapUtil.setRenderToTrue(swapList);
@@ -125,7 +127,7 @@ public abstract class DrawContextMixin {
                                         if (swap.getTargetStackHash() == -1)
                                             swap.setTargetStackHash(stack.hashCode());
                                         //LOGGER.info("i2c insert render on " + stack + " to render " + swap.getSwapItem() + ", hash=" + swap.getSwapItem().hashCode());
-                                        renderSwap(swap, x, y, copiedStack);
+                                        smooth_Swapping$renderSwap(swap, x, y, copiedStack);
 
                                         if (SwapUtil.hasArrived(swap)) swap.setArrived(true);
                                     }
@@ -144,7 +146,8 @@ public abstract class DrawContextMixin {
         }
     }
 
-    private void renderSwap(InventorySwap swap, int x, int y, ItemStack copiedStack) {
+    @Unique
+    private void smooth_Swapping$renderSwap(InventorySwap swap, int x, int y, ItemStack copiedStack) {
         float lastFrameDuration = client.getLastFrameDuration();
         Config config = ConfigManager.getConfig();
 
@@ -175,16 +178,17 @@ public abstract class DrawContextMixin {
 
     @Inject(method = "drawItemInSlot(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
     public void onDrawItemInSlot(TextRenderer textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo cbi) {
-        if (isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
+        if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
 
         try {
-            doOverlayRender(stack, x, y, cbi);
+            smooth_Swapping$doOverlayRender(stack, x, y, cbi);
         } catch (Exception e) {
             SwapUtil.reset();
         }
     }
 
-    private void doOverlayRender(ItemStack stack, int x, int y, CallbackInfo cbi) throws StackOverflowError {
+    @Unique
+    private void smooth_Swapping$doOverlayRender(ItemStack stack, int x, int y, CallbackInfo cbi) throws StackOverflowError {
         int index = SwapUtil.getSlotIndex(stack);
 
         if (SmoothSwapping.swaps.containsKey(index)) {
@@ -240,7 +244,8 @@ public abstract class DrawContextMixin {
     }
 
 
-    private boolean isHotbar() {
+    @Unique
+    private boolean smooth_Swapping$isHotbar() {
         Vector3f zOffset = new Vector3f();
         matrices.peek().getPositionMatrix().getColumn(3, zOffset);
         return zOffset.round().x <= 0;
