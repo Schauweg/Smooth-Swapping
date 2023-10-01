@@ -47,8 +47,7 @@ public class ConfigManager {
                 }
             }
         } catch (FileNotFoundException e) {
-            System.err.println("Couldn't load Login Toast configuration file; reverting to defaults");
-            e.printStackTrace();
+            System.err.println("Couldn't load Smooth Swapping configuration file; reverting to defaults");
         }
     }
 
@@ -59,8 +58,7 @@ public class ConfigManager {
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(jsonString);
         } catch (IOException e) {
-            System.err.println("Couldn't save Login Toast configuration file");
-            e.printStackTrace();
+            System.err.println("Couldn't save Smooth Swapping configuration file");
         }
     }
 
