@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
     id "me.shedaniel.unified-publishing"
 }
 
@@ -45,17 +45,17 @@ processResources {
 
 shadowJar {
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier = "dev-shadow"
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier "${rootProject.minecraft_version}-fabric"
+    archiveClassifier = "${rootProject.minecraft_version}-fabric"
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier = "dev"
 }
 
 sourcesJar {
