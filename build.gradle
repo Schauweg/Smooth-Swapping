@@ -12,6 +12,10 @@ repositories {
     maven {
         url = "https://api.modrinth.com/maven"
     }
+    maven {
+        name "neoforgedReleases"
+        url "https://maven.neoforged.net/releases"
+    }
 }
 
 subprojects {
