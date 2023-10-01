@@ -94,7 +94,7 @@ unifiedPublishing {
         displayName = "[Forge $project.minecraft_version] v$project.version"
         releaseType = "$rootProject.artifact_type"
         changelog = CHANGELOG
-        gameVersions = ["1.19.4"]
+        gameVersions = SUPPORTED_VERSIONS
         gameLoaders = ["forge"]
         mainPublication tasks.remapJar
 
