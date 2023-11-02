@@ -58,7 +58,7 @@ public abstract class HandledScreenMixin {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
 
-        @SuppressWarnings("rawtypes")
+        @SuppressWarnings({"rawtypes", "DataFlowIssue"})
         HandledScreen handledScreen = (HandledScreen) (Object) this;
 
         if (handledScreen instanceof CreativeInventoryScreen) return;

@@ -1,7 +1,5 @@
 package dev.shwg.smoothswapping.config;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import dev.shwg.smoothswapping.SmoothSwapping;
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.mixin.SimpleInventoryAccessor;
 import net.minecraft.client.MinecraftClient;
@@ -10,9 +8,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -38,7 +33,6 @@ public class InventoryWidget extends ClickableWidget {
     private static final int borderWidthTop = 17;
     private static final int splitterHeight = 14;
     private final int columns, rows;
-    ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
     public final DefaultedList<Slot> slots = DefaultedList.of();
     private final Text title;
     private Slot focusedSlot;

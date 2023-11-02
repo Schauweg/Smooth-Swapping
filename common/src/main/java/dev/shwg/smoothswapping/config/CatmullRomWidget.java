@@ -4,12 +4,10 @@ import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
 import dev.shwg.smoothswapping.mixin.ClickableWidgetAccessor;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
@@ -78,7 +76,7 @@ public class CatmullRomWidget extends ClickableWidget {
             Vec2 p3 = points.get(i + 2);
 
             CatmullRomSpline spline = new CatmullRomSpline(p0, p1, p2, p3);
-            for (float t = 0; t < 1; t += 0.005) {
+            for (float t = 0; t < 1; t += 0.005f) {
                 Vec2 point = spline.getSegment().getPoint(t);
                 int xC = (int) (this.getX() + borderSize + (point.v[0] * gridWidth)) + 1;
                 int yC = (int) (this.getY() + borderSize + gridHeight + -point.v[1] * gridHeight) - 1;
@@ -260,7 +258,7 @@ public class CatmullRomWidget extends ClickableWidget {
                     p1);
         }
 
-        public Segment getSegment() {
+        private Segment getSegment() {
             return this.segment;
         }
 
@@ -273,9 +271,9 @@ public class CatmullRomWidget extends ClickableWidget {
         }
     }
 
-    public class CMRTooltipPosition implements TooltipPositioner {
+    public static class CMRTooltipPosition implements TooltipPositioner {
 
-        private CatmullRomWidget widget;
+        private final CatmullRomWidget widget;
         private final int xOffset = 10;
 
         public CMRTooltipPosition(CatmullRomWidget widget){
