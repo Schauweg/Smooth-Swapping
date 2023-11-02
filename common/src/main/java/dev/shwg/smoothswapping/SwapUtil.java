@@ -61,7 +61,10 @@ public class SwapUtil {
         if (ItemStack.areItemsEqual(toSlot.getStack(), Items.AIR.getDefaultStack()))
             return;
 
-        swaps.add(new ItemToItemInventorySwap(fromSlot, toSlot, checked, amount));
+        ItemStack swapStack = toSlot.getStack().copy();
+        ((ItemStackAccessor) (Object) swapStack).smooth_Swapping$setIsSwapStack(true);
+
+        swaps.add(new ItemToItemInventorySwap(fromSlot, toSlot, checked, amount, swapStack));
         SmoothSwapping.swaps.put(index, swaps);
     }
 
@@ -74,6 +77,9 @@ public class SwapUtil {
 
             if (ItemStack.areItemsEqual(cursorStack, Items.AIR.getDefaultStack()))
                 return;
+
+            ItemStack swapStack = lessStack.getOldStack().copy();
+            ((ItemStackAccessor) (Object) swapStack).smooth_Swapping$setIsSwapStack(true);
 
             swaps.add(new ItemToCursorInventorySwap(lessSlot, mousePos, lessStack.getOldStack(), false, lessStack.itemCountToChange));
             SmoothSwapping.swaps.put(ASSUME_CURSOR_STACK_SLOT_INDEX, swaps);

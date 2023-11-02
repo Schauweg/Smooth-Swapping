@@ -10,7 +10,8 @@
     "ClickSlotPacketMixin",
     "DrawContextMixin",
     "HandledScreenMixin",
-    "SimpleInventoryAccessor"
+    "SimpleInventoryAccessor",
+    "ItemStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1

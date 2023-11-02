@@ -1,5 +1,6 @@
 package dev.shwg.smoothswapping.mixin;
 
+import dev.shwg.smoothswapping.ItemStackAccessor;
 import dev.shwg.smoothswapping.SmoothSwapping;
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.config.CatmullRomWidget;
@@ -50,6 +51,8 @@ public abstract class DrawContextMixin {
     public void onItemDraw(LivingEntity entity, World world, ItemStack stack, int x, int y, int seed, int z, CallbackInfo cbi) {
         if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
 
+        if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
+
         try {
             smooth_Swapping$doSwap(stack, x, y, cbi);
         } catch (Exception e) {
@@ -78,7 +81,7 @@ public abstract class DrawContextMixin {
                 }
 
                 //LOGGER.info("render i2i swap, stack hash: " + stack.hashCode());
-                smooth_Swapping$renderSwap(swap, x, y, stack.copy());
+                smooth_Swapping$renderSwap(swap, x, y, swap.getSwapItem());
 
                 if (SwapUtil.hasArrived(swap)) {
                     SwapUtil.setRenderToTrue(swapList);
@@ -177,6 +180,8 @@ public abstract class DrawContextMixin {
     @Inject(method = "drawItemInSlot(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
     public void onDrawItemInSlot(TextRenderer textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo cbi) {
         if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
+
+        if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
 
         try {
             smooth_Swapping$doOverlayRender(stack, x, y, cbi);
