@@ -1,12 +1,12 @@
 {
-  "smoothswapping.config.menu": "Smooth Swapping Eingstellungs Menü",
+  "smoothswapping.config.menu": "Smooth Swapping Einstellungsmenü",
   "smoothswapping.config.toggle": "Mod Aktivieren",
   "smoothswapping.config.toggle.on": "Aktiviert",
   "smoothswapping.config.toggle.off": "Deaktiviert",
   "smoothswapping.config.testinventory": "Test Inventar",
   "smoothswapping.config.option.animationspeed.tooltip": "-Rechtsklick auf das leere Feld um einen neuen Kurvenpunkt zu erstellen\n-Linksklick auf einen Punkt und ihn gedrückt ziehen um ihn zu bewegen\n-Rechtsklick auf den Punk um ihn zu löschen",
-  "smoothswapping.config.option.animationspeed": "Animation Geschwindigkeit",
-  "smoothswapping.config.option.animationspeed.speed": "Geschwindkeit",
+  "smoothswapping.config.option.animationspeed": "Animations Geschwindigkeit",
+  "smoothswapping.config.option.animationspeed.speed": "Geschwindigkeit",
   "smoothswapping.config.option.animationspeed.reset": "Zurücksetzen",
   "smoothswapping.config.save": "Speichern & Schließen",
   "smoothswapping.config.exit": "Schließen"

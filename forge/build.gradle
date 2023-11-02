@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
     id "me.shedaniel.unified-publishing"
 }
 architectury {
@@ -15,6 +15,13 @@ configurations {
     developmentForge.extendsFrom common
 }
 
+repositories {
+    maven {
+        name "neoforgedReleases"
+        url "https://maven.neoforged.net/releases"
+    }
+}
+
 loom {
     forge {
         mixinConfig "smoothswapping-common.mixins.json"
@@ -22,7 +29,7 @@ loom {
 }
 
 dependencies {
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+    forge "net.neoforged:forge:${rootProject.architectury.minecraft}-${project.forge_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
@@ -40,17 +47,17 @@ shadowJar {
     exclude "fabric.mod.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    archiveClassifier = "dev-shadow"
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier null
+    archiveClassifier = "${rootProject.minecraft_version}-forge"
 }
 
 jar {
-    classifier "dev"
+    archiveClassifier = "dev"
 }
 
 sourcesJar {
@@ -87,7 +94,7 @@ unifiedPublishing {
         displayName = "[Forge $project.minecraft_version] v$project.version"
         releaseType = "$rootProject.artifact_type"
         changelog = CHANGELOG
-        gameVersions = ["1.19.4"]
+        gameVersions = SUPPORTED_VERSIONS
         gameLoaders = ["forge"]
         mainPublication tasks.remapJar
 

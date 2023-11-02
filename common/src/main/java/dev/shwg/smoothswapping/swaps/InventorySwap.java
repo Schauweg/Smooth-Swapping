@@ -10,7 +10,6 @@ public class InventorySwap {
     private boolean renderDestinationSlot;
     private final boolean checked;
     private final int amount;
-    
     private final ItemStack swapItem;
 
     public InventorySwap(Vec2 fromVec, Vec2 toVec, ItemStack swapItem, boolean checked, int amount) {

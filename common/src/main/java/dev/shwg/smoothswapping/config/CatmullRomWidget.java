@@ -3,12 +3,11 @@ package dev.shwg.smoothswapping.config;
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
 import dev.shwg.smoothswapping.mixin.ClickableWidgetAccessor;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
@@ -42,7 +41,7 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
 
         //workaround because overriding mouseMoved doesn't work
         //hide tooltip when mouse is moved again
@@ -54,21 +53,21 @@ public class CatmullRomWidget extends ClickableWidget {
 
         Collections.sort(this.points);
 
-        fill(matrices, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFA000000);
+        context.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFA000000);
 
         for (int i = 0; i < verticalLines; i++) {
             int stepSize = this.gridWidth / verticalLines;
-            drawVerticalLine(matrices, this.getX() + this.borderSize + stepSize + i * stepSize, this.getY() + borderSize, this.getY() + this.borderSize + this.gridHeight, 0x10FFFFFF);
+            context.drawVerticalLine(this.getX() + this.borderSize + stepSize + i * stepSize, this.getY() + borderSize, this.getY() + this.borderSize + this.gridHeight, 0x10FFFFFF);
         }
 
         for (int i = 0; i < horizontalLines; i++) {
             int stepSize = this.gridHeight / horizontalLines;
 
-            drawHorizontalLine(matrices, this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
+            context.drawHorizontalLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
         }
 
-        drawVerticalLine(matrices, this.getX() + this.borderSize, this.getY() + this.borderSize, this.getY() + this.borderSize + gridHeight, 0xFFFFFFFF);
-        drawHorizontalLine(matrices, this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + this.gridHeight, 0xFFFFFFFF);
+        context.drawVerticalLine(this.getX() + this.borderSize, this.getY() + this.borderSize, this.getY() + this.borderSize + gridHeight, 0xFFFFFFFF);
+        context.drawHorizontalLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + this.gridHeight, 0xFFFFFFFF);
 
         for (int i = 1; i < points.size() - 2; i++) {
             Vec2 p0 = points.get(i - 1);
@@ -77,11 +76,11 @@ public class CatmullRomWidget extends ClickableWidget {
             Vec2 p3 = points.get(i + 2);
 
             CatmullRomSpline spline = new CatmullRomSpline(p0, p1, p2, p3);
-            for (float t = 0; t < 1; t += 0.005) {
+            for (float t = 0; t < 1; t += 0.005f) {
                 Vec2 point = spline.getSegment().getPoint(t);
                 int xC = (int) (this.getX() + borderSize + (point.v[0] * gridWidth)) + 1;
                 int yC = (int) (this.getY() + borderSize + gridHeight + -point.v[1] * gridHeight) - 1;
-                drawPixel(matrices, xC, yC, 0xFFFF0000);
+                drawPixel(context, xC, yC, 0xFFFF0000);
             }
         }
 
@@ -92,9 +91,9 @@ public class CatmullRomWidget extends ClickableWidget {
             int yC = (int) (this.getY() + borderSize + gridHeight + -point.v[1] * gridHeight) - 1;
 
             if (hoveredPointIndex != null && points.get(hoveredPointIndex).equals(point)) {
-                fill(matrices, xC - 2, yC - 2, xC + 2, yC + 2, 0xFFFFFF00);
+                context.fill(xC - 2, yC - 2, xC + 2, yC + 2, 0xFFFFFF00);
             } else {
-                fill(matrices, xC - 2, yC - 2, xC + 2, yC + 2, 0xFFC908FF);
+                context.fill(xC - 2, yC - 2, xC + 2, yC + 2, 0xFFC908FF);
             }
         }
     }
@@ -196,8 +195,8 @@ public class CatmullRomWidget extends ClickableWidget {
         return (borderSize - globalY + gridHeight + this.getY() - 1) / gridHeight;
     }
 
-    private void drawPixel(MatrixStack matrices, int x, int y, int color) {
-        fill(matrices, x, y, x + 1, y + 1, color);
+    private void drawPixel(DrawContext context, int x, int y, int color) {
+        context.fill(x, y, x + 1, y + 1, color);
     }
 
     private boolean isMouseInGrid(double mouseX, double mouseY) {
@@ -259,7 +258,7 @@ public class CatmullRomWidget extends ClickableWidget {
                     p1);
         }
 
-        public Segment getSegment() {
+        private Segment getSegment() {
             return this.segment;
         }
 
@@ -272,9 +271,9 @@ public class CatmullRomWidget extends ClickableWidget {
         }
     }
 
-    public class CMRTooltipPosition implements TooltipPositioner {
+    public static class CMRTooltipPosition implements TooltipPositioner {
 
-        private CatmullRomWidget widget;
+        private final CatmullRomWidget widget;
         private final int xOffset = 10;
 
         public CMRTooltipPosition(CatmullRomWidget widget){
@@ -282,15 +281,15 @@ public class CatmullRomWidget extends ClickableWidget {
         }
 
         @Override
-        public Vector2ic getPosition(Screen screen, int x, int y, int width, int height) {
+        public Vector2ic getPosition(int screenWidth, int screenHeight, int x, int y, int width, int height) {
             Vector2i vector2i = new Vector2i();
             vector2i.x = x + xOffset;
             vector2i.y = y - height;
-            if (vector2i.y + height> screen.height) {
+            if (vector2i.y + height> screenHeight) {
                 vector2i.y = this.widget.getY() - height - 1;
             }
 
-            if (vector2i.x + width > screen.width) {
+            if (vector2i.x + width > screenWidth) {
                 vector2i.x = Math.max(this.widget.getX() + this.widget.getWidth() - width - xOffset, 4);
             }
 

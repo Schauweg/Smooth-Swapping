@@ -8,9 +8,10 @@
   "client": [
     "ClickableWidgetAccessor",
     "ClickSlotPacketMixin",
+    "DrawContextMixin",
     "HandledScreenMixin",
-    "ItemRendererMixin",
-    "SimpleInventoryAccessor"
+    "SimpleInventoryAccessor",
+    "ItemStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1
