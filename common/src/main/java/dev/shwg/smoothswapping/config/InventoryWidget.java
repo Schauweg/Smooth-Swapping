@@ -48,7 +48,7 @@ public class InventoryWidget extends ClickableWidget {
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
                 Slot slot = new Slot(inventory, slots.size(), x + 1 + borderWidth + column * slotHeight, y + 1 + borderWidthTop + row * slotHeight + (row == rows - 1 ? splitterHeight : 0));
-                slot.setStack(ItemStack.EMPTY);
+                slot.setStackNoCallbacks(ItemStack.EMPTY);
                 slots.add(slot);
             }
         }
