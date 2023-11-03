@@ -29,7 +29,7 @@ loom {
 }
 
 dependencies {
-    forge "net.neoforged:forge:${rootProject.architectury.minecraft}-${project.forge_version}"
+    forge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
