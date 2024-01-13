@@ -57,7 +57,7 @@ public class InventoryWidget extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
 
         //Render Border
         context.drawTexture(TEXTURE, this.getX(), this.getY(), 0, 0, borderWidth, height - borderWidth); //left border
