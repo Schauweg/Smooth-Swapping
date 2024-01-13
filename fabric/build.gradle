@@ -1,11 +1,15 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.github.johnrengelman.shadow"
     id "me.shedaniel.unified-publishing"
 }
 
 architectury {
     platformSetupLoomIde()
     fabric()
+}
+
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
 }
 
 configurations {
@@ -49,6 +53,8 @@ shadowJar {
 }
 
 remapJar {
+    injectAccessWidener = true
+
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     archiveClassifier = "${rootProject.minecraft_version}-fabric"

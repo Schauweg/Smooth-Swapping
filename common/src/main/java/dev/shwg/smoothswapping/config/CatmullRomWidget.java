@@ -2,7 +2,6 @@ package dev.shwg.smoothswapping.config;
 
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
-import dev.shwg.smoothswapping.mixin.ClickableWidgetAccessor;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -10,7 +9,6 @@ import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
@@ -36,19 +34,18 @@ public class CatmullRomWidget extends ClickableWidget {
         this.gridWidth = gridWidth;
         this.verticalLines = verticalLines;
         this.horizontalLines = horizontalLines;
-        this.setTooltip(Tooltip.of(Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
+        this.setTooltip(new CustomTooltip(this, Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
         this.setTooltipDelay(1000);
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
 
         //workaround because overriding mouseMoved doesn't work
         //hide tooltip when mouse is moved again
         if (mouseX != oldMouseX || mouseY != oldMouseY){
             oldMouseX = mouseX;
             oldMouseY = mouseY;
-            ((ClickableWidgetAccessor) this).setLastHoveredTime(Util.getMeasuringTimeMs());
         }
 
         Collections.sort(this.points);
@@ -136,11 +133,6 @@ public class CatmullRomWidget extends ClickableWidget {
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
 
-    }
-
-    @Override
-    protected TooltipPositioner getTooltipPositioner() {
-        return new CMRTooltipPosition(this);
     }
 
     public List<Vec2> getPoints() {

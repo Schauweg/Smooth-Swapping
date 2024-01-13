@@ -6,12 +6,11 @@
   "mixins": [
   ],
   "client": [
-    "ClickableWidgetAccessor",
     "ClickSlotPacketMixin",
     "DrawContextMixin",
     "HandledScreenMixin",
-    "SimpleInventoryAccessor",
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "SimpleInventoryAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
