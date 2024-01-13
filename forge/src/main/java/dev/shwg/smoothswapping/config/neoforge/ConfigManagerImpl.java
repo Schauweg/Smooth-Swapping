@@ -1,4 +1,4 @@
-package dev.shwg.smoothswapping.config.forge;
+package dev.shwg.smoothswapping.config.neoforge;
 
 import net.neoforged.fml.loading.FMLPaths;
 
