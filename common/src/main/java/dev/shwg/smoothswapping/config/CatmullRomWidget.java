@@ -38,7 +38,7 @@ public class CatmullRomWidget extends ClickableWidget {
         this.verticalLines = verticalLines;
         this.horizontalLines = horizontalLines;
         this.setTooltip(Tooltip.of(Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
-        this.setTooltipDelay(Duration.ofDays(1000));
+        this.setTooltipDelay(Duration.ofMillis(1000));
     }
 
     @Override
@@ -138,11 +138,6 @@ public class CatmullRomWidget extends ClickableWidget {
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
 
     }
-
-//    @Override
-//    protected TooltipPositioner getTooltipPositioner() {
-//        return new CMRTooltipPosition(this);
-//    }
 
     public List<Vec2> getPoints() {
         return this.points;
