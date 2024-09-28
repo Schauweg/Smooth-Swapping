@@ -8,11 +8,20 @@ architectury {
 }
 
 configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    common {
+        canBeResolved = true
+        canBeConsumed = false
+    }
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
+    developmentNeoForge.extendsFrom common
+
+    // Files in this configuration will be bundled into your mod using the Shadow plugin.
+    // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
+    shadowBundle {
+        canBeResolved = true
+        canBeConsumed = false
+    }
 }
 
 repositories {
@@ -25,8 +34,8 @@ repositories {
 dependencies {
     neoForge "net.neoforged:neoforge:${project.forge_version}"
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
+    shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 }
 
 processResources {
@@ -40,7 +49,7 @@ processResources {
 shadowJar {
     exclude "fabric.mod.json"
 
-    configurations = [project.configurations.shadowCommon]
+    configurations = [project.configurations.shadowBundle]
     archiveClassifier = "dev-shadow"
 }
 

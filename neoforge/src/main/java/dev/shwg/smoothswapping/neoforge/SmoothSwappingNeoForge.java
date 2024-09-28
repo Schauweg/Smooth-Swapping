@@ -7,8 +7,8 @@ import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 
 @Mod(SmoothSwapping.MOD_ID)
-public class SmoothSwappingForge {
-    public SmoothSwappingForge() {
+public class SmoothSwappingNeoForge {
+    public SmoothSwappingNeoForge() {
         SmoothSwapping.init();
         ModLoadingContext.get().registerExtensionPoint(
                 IConfigScreenFactory.class,
