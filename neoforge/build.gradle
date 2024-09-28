@@ -4,7 +4,7 @@ plugins {
 }
 architectury {
     platformSetupLoomIde()
-    forge()
+    neoForge()
 }
 
 configurations {
@@ -22,14 +22,8 @@ repositories {
     }
 }
 
-loom {
-    forge {
-        mixinConfig "smoothswapping-common.mixins.json"
-    }
-}
-
 dependencies {
-    forge "net.neoforged:forge:${rootProject.architectury.minecraft}-${project.forge_version}"
+    neoForge "net.neoforged:neoforge:${project.forge_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
@@ -38,7 +32,7 @@ dependencies {
 processResources {
     inputs.property "version", project.version
 
-    filesMatching("META-INF/mods.toml") {
+    filesMatching("META-INF/neoforge.mods.toml") {
         expand "version": project.version
     }
 }
