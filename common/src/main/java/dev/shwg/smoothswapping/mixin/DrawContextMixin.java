@@ -149,7 +149,7 @@ public abstract class DrawContextMixin {
 
     @Unique
     private void smooth_Swapping$renderSwap(InventorySwap swap, int x, int y, ItemStack copiedStack) {
-        float lastFrameDuration = client.getLastFrameDuration();
+//        float lastFrameDuration = client.getLastFrameDuration();
         Config config = ConfigManager.getConfig();
 
         double swapX = swap.getX();
@@ -172,8 +172,8 @@ public abstract class DrawContextMixin {
 
         double speed = swap.getDistance() / 10 * config.getAnimationSpeedFormatted();
 
-        swap.setX(swapX + lastFrameDuration * speed * Math.cos(angle));
-        swap.setY(swapY + lastFrameDuration * speed * Math.sin(angle));
+        swap.setX(swapX + speed * Math.cos(angle));
+        swap.setY(swapY + speed * Math.sin(angle));
         matrices.pop();
     }
 

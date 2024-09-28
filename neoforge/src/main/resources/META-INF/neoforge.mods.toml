@@ -1,5 +1,5 @@
 modLoader = "javafml" #mandatory
-loaderVersion = "[45,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion = "[4,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license = "GNU LGPL 3.0"
 issueTrackerURL = "https://github.com/Schauweg/Smooth-Swapping/issues"
 
@@ -17,9 +17,9 @@ Moves items smoothly in inventories
 
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.smoothswapping]] #optional
-modId = "forge" #mandatory
+modId = "neoforge" #mandatory
 mandatory = true #mandatory
-versionRange = "[45,)" #mandatory
+versionRange = "[21,)" #mandatory
 ordering = "NONE"
 side = "BOTH"
 
@@ -28,6 +28,9 @@ side = "BOTH"
 modId = "minecraft"
 mandatory = true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange = "[1.20.1, 1.20.2]"
+versionRange = "[1.21,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[mixins]]
+config = "smoothswapping-common.mixins.json"
