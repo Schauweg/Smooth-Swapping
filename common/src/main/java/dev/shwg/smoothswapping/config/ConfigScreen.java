@@ -78,8 +78,8 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.drawCenteredTextWithShadow(textRenderer, title, this.width / 2, 10, 0xFFFFFFFF);
         super.render(context, mouseX, mouseY, delta);
+        context.drawCenteredTextWithShadow(textRenderer, title, this.width / 2, 10, 0xFFFFFFFF);
         config.setCurvePoints(catmullRomWidget.getPoints());
     }
 
