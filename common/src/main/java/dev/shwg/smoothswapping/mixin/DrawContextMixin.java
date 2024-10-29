@@ -45,7 +45,7 @@ public abstract class DrawContextMixin {
     private MinecraftClient client;
     @Shadow
     public abstract void drawItem(ItemStack item, int x, int y);
-    @Shadow public abstract void drawItemInSlot(TextRenderer textRenderer, ItemStack stack, int x, int y, @Nullable String countOverride);
+    @Shadow public abstract void drawStackOverlay(TextRenderer textRenderer, ItemStack stack, int x, int y, @Nullable String countOverride);
 
     @Inject(method = "drawItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;IIII)V", at = @At("HEAD"), cancellable = true)
     public void onItemDraw(LivingEntity entity, World world, ItemStack stack, int x, int y, int seed, int z, CallbackInfo cbi) {
@@ -149,7 +149,7 @@ public abstract class DrawContextMixin {
 
     @Unique
     private void smooth_Swapping$renderSwap(InventorySwap swap, int x, int y, ItemStack copiedStack) {
-        float lastFrameDuration = client.getLastFrameDuration();
+        float lastFrameDuration = client.getRenderTickCounter().getLastFrameDuration();
         Config config = ConfigManager.getConfig();
 
         double swapX = swap.getX();
@@ -177,7 +177,7 @@ public abstract class DrawContextMixin {
         matrices.pop();
     }
 
-    @Inject(method = "drawItemInSlot(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "drawStackOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
     public void onDrawItemInSlot(TextRenderer textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo cbi) {
         if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
 
@@ -230,9 +230,9 @@ public abstract class DrawContextMixin {
                     matrices.translate(renderX, -renderY, 350);
 
                     if (stack.isItemBarVisible())
-                        drawItemInSlot(client.textRenderer, stack.copy(), x, y, null);
+                        drawStackOverlay(client.textRenderer, stack.copy(), x, y, null);
                     else
-                        drawItemInSlot(client.textRenderer, stack.copy(), x, y, amount);
+                        drawStackOverlay(client.textRenderer, stack.copy(), x, y, amount);
 
                     matrices.pop();
                 }
@@ -240,7 +240,7 @@ public abstract class DrawContextMixin {
             }
 
             if (renderToSlot && stackCount > 1) {
-                drawItemInSlot(client.textRenderer, stack.copy(), x, y, String.valueOf(stackCount));
+                drawStackOverlay(client.textRenderer, stack.copy(), x, y, String.valueOf(stackCount));
             }
             cbi.cancel();
         }

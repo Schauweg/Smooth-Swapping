@@ -2,7 +2,7 @@ package dev.shwg.smoothswapping.config;
 
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
-import dev.shwg.smoothswapping.mixin.ClickableWidgetAccessor;
+//import dev.shwg.smoothswapping.mixin.ClickableWidgetAccessor;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,18 +38,18 @@ public class CatmullRomWidget extends ClickableWidget {
         this.verticalLines = verticalLines;
         this.horizontalLines = horizontalLines;
         this.setTooltip(Tooltip.of(Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
-        this.setTooltipDelay(1000);
+        this.setTooltipDelay(Duration.ofMillis(1000));
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
 
         //workaround because overriding mouseMoved doesn't work
         //hide tooltip when mouse is moved again
         if (mouseX != oldMouseX || mouseY != oldMouseY){
             oldMouseX = mouseX;
             oldMouseY = mouseY;
-            ((ClickableWidgetAccessor) this).setLastHoveredTime(Util.getMeasuringTimeMs());
+//            ((ClickableWidgetAccessor) this).setLastHoveredTime(Util.getMeasuringTimeMs());
         }
 
         Collections.sort(this.points);
@@ -136,11 +137,6 @@ public class CatmullRomWidget extends ClickableWidget {
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
 
-    }
-
-    @Override
-    protected TooltipPositioner getTooltipPositioner() {
-        return new CMRTooltipPosition(this);
     }
 
     public List<Vec2> getPoints() {

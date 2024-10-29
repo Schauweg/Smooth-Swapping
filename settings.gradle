@@ -6,10 +6,11 @@ pluginManagement {
             name "neoforgedReleases"
             url "https://maven.neoforged.net/releases"
         }
+        maven { url "https://files.minecraftforge.net/maven/" }
         gradlePluginPortal()
     }
 }
 
 include("common")
 include("fabric")
-include("forge")
+include("neoforge")
