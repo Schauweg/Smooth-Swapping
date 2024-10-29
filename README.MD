@@ -2,39 +2,39 @@
 
 ---
 
-<h3 align="center">About</h3>
+<h3 align="center">About:</h3>
 
-Smooth Swapping is a client side mod that animates item movement inside of inventories.
+Smooth Swapping is a client-side mod that animates item movements inside of inventories.
 
-- It is avaible for Fabric and Forge (since Minecraft version 1.19.4)
+- Has been in development ever since the release of 1.19.4 and is available for both Fabric and Forge on 1.18+ (The 1.17.1 version is exclusive to Fabric).
 
-- Eventhough it is written using Architectury it does **not** need the Aechtectury API, neither for Forge or Fabric
+- Even though it is written using Architectury, it does **not** need the Architectury API - neither for Forge nor for Fabric.
 
-- If you use the Fabric version you need the [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api) and you will need [Modmenu](https://modrinth.com/mod/modmenu) to able to access the settings menu
+- If you use the Fabric version you'll need [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api) to make it function and [Modmenu](https://modrinth.com/mod/modmenu) to able to access the settings menu.
 
 ---
 
-<p align="center" style="text-align: center;">Smooth Item animation inside an inventory</p>
+<p align="center" style="text-align: center;">Smooth item animations inside of an inventory:</p>
 
 ![inventory animation](https://media.forgecdn.net/attachments/655/59/inventory.gif)
 
 ---
 
-<p align="center" style="text-align: center;">Smooth Swapping settings menu</p>
+<p align="center" style="text-align: center;">The Smooth Swapping settings menu contains the following:</p>
 
-- Toogle button to activate and deactivate the mod
+- Toggle button to activate and deactivate the mod.
 
-- Slider to adjust the animation speed
+- Slider to adjust the animation speed.
 
-- Graph to change the animation curve
+- Graph to change the animation curve.
   
-  - Right click with your mouse on an empty space to create a new curve point
+  - Right-click with your mouse on an empty space to create a new curve point.
   
-  - Left click and drag a point to move it. The first and last point can't be moved though
+  - Left-click and drag a point to move it (The very first and last points on the graph cannot be moved).
   
-  - Right click on a point to delete it
+  - Right-click on a point to delete it.
 
-- small inventory to test your animation
+- Small inventory to test your animation.
 
 ![settings menu](https://media.forgecdn.net/attachments/655/61/settings.gif)
 
