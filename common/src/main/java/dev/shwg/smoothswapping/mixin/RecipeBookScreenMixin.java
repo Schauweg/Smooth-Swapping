@@ -10,13 +10,14 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.AbstractRecipeScreenHandler;
+import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,18 +31,15 @@ import java.util.Map;
 import static dev.shwg.smoothswapping.SmoothSwapping.oldCursorStack;
 import static dev.shwg.smoothswapping.SwapUtil.getCount;
 
-@Mixin(HandledScreen.class)
-public abstract class HandledScreenMixin {
-
-    @Shadow
-    @Final
-    protected ScreenHandler handler;
-
-    @Shadow
-    protected int x, y;
+@Mixin(RecipeBookScreen.class)
+public abstract class RecipeBookScreenMixin<T extends AbstractRecipeScreenHandler> extends HandledScreen<T> {
 
     @Unique
     private Screen smooth_Swapping$currentScreen = null;
+
+    public RecipeBookScreenMixin(T handler, PlayerInventory inventory, Text title) {
+        super(handler, inventory, title);
+    }
 
     @Inject(method = "render", at = @At("HEAD"))
     public void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
@@ -56,11 +54,6 @@ public abstract class HandledScreenMixin {
     private void smooth_Swapping$doRender(double mouseX, double mouseY) {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
-
-        @SuppressWarnings({"rawtypes", "DataFlowIssue"})
-        HandledScreen handledScreen = (HandledScreen) (Object) this;
-
-        if (handledScreen instanceof CreativeInventoryScreen) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
 

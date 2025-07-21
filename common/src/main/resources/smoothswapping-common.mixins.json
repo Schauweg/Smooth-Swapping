@@ -9,6 +9,7 @@
     "ClickSlotPacketMixin",
     "DrawContextMixin",
     "HandledScreenMixin",
+    "RecipeBookScreenMixin",
     "SimpleInventoryAccessor",
     "ItemStackMixin"
   ],
