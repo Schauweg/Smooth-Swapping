@@ -1,16 +1,19 @@
 package dev.shwg.smoothswapping.config;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+//import static net.minecraft.client.gui.screen.ingame.HandledScreen.;
+import static dev.shwg.smoothswapping.SmoothSwapping.currentStacks;
+import static dev.shwg.smoothswapping.SmoothSwapping.oldStacks;
+
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.mixin.SimpleInventoryAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -20,9 +23,6 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
-
-import static dev.shwg.smoothswapping.SmoothSwapping.*;
-//import static net.minecraft.client.gui.screen.ingame.HandledScreen.;
 
 @SuppressWarnings("SuspiciousNameCombination")
 public class InventoryWidget extends ClickableWidget {
@@ -128,10 +128,10 @@ public class InventoryWidget extends ClickableWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0) {
-            if (isPointOverSlot(focusedSlot, mouseX, mouseY)) {
-                if (Screen.hasShiftDown()) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.button() == 0) {
+            if (isPointOverSlot(focusedSlot, click.x(), click.y())) {
+                if (click.hasShift()) {
                     //Focused Slot is in last row
                     if (focusedSlot.getIndex() >= slots.size() - columns) {
                         for (int i = 0; i < slots.size() - columns; i++) {

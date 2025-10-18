@@ -1,7 +1,18 @@
 package dev.shwg.smoothswapping.config;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
+
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
+import net.minecraft.client.gui.Click;
 //import dev.shwg.smoothswapping.mixin.ClickableWidgetAccessor;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -10,16 +21,6 @@ import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import net.minecraft.util.Util;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2i;
-import org.joml.Vector2ic;
-
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class CatmullRomWidget extends ClickableWidget {
 
@@ -100,34 +101,34 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 1) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.button() == 1) {
             if (hoveredPointIndex != null) {
                 this.points.remove((int) hoveredPointIndex);
-            } else if (isMouseInGrid(mouseX, mouseY)) {
-                this.points.add(new Vec2(getPointX(mouseX), getPointY(mouseY)));
+            } else if (isMouseInGrid(click.x(), click.y())) {
+                this.points.add(new Vec2(getPointX(click.x()), getPointY(click.y())));
             }
         }
-        return isMouseOver(mouseX, mouseY);
+        return isMouseOver(click.x(), click.y());
     }
 
     @Override
-    protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {
+    protected void onDrag(Click click, double deltaX, double deltaY) {
         if (hoveredPointIndex != null) {
             Vec2 hoveredPoint = this.points.get(hoveredPointIndex);
-            double newX = getPointX(mouseX);
-            double newY = getPointY(mouseY);
-            if (isMouseInGridYExtended(mouseX, mouseY))
+            double newX = getPointX(click.x());
+            double newY = getPointY(click.y());
+            if (isMouseInGridYExtended(click.x(), click.y()))
                 hoveredPoint.v[0] = newX;
-            if (isMouseInGridYExtended(mouseX, mouseY))
+            if (isMouseInGridYExtended(click.x(), click.y()))
                 hoveredPoint.v[1] = newY;
         }
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
         if (hoveredPointIndex != null) {
-            this.onDrag(mouseX, mouseY, deltaX, deltaY);
+            this.onDrag(click, deltaX, deltaY);
             return true;
         } else {
             return false;
