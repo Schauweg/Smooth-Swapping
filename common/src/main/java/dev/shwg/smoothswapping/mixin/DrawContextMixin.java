@@ -149,7 +149,7 @@ public abstract class DrawContextMixin {
 
     @Unique
     private void smooth_Swapping$renderSwap(InventorySwap swap, int x, int y, ItemStack copiedStack) {
-        float lastFrameDuration = client.getRenderTickCounter().getLastFrameDuration();
+        float lastFrameDuration = client.getRenderTickCounter().getDynamicDeltaTicks();
         Config config = ConfigManager.getConfig();
 
         double swapX = swap.getX();

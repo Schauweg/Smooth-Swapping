@@ -22,7 +22,7 @@ public class SmoothSwapping {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static final int ASSUME_CURSOR_STACK_SLOT_INDEX = -2;
     public static boolean clickSwap;
-    public static Integer clickSwapStack;
+    public static Short clickSwapStack;
     public static Map<Integer, List<InventorySwap>> swaps;
     public static DefaultedList<ItemStack> oldStacks, currentStacks;
     public static ItemStack oldCursorStack;
