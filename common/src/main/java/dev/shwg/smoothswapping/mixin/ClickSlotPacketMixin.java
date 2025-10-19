@@ -16,6 +16,7 @@ import net.minecraft.util.collection.DefaultedList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -42,7 +43,7 @@ public class ClickSlotPacketMixin {
     public void onInit(CallbackInfo cbi) {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
-
+        //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove(slot);
 
         if ((actionType == SlotActionType.QUICK_MOVE || actionType == SlotActionType.SWAP) && modifiedStacks.size() > 1 && MinecraftClient.getInstance().currentScreen instanceof HandledScreen) {
@@ -58,6 +59,7 @@ public class ClickSlotPacketMixin {
                     ItemStack newMouseStack = modifiedStacks.get(slot);
                     ItemStack oldMouseStack = smooth_Swapping$getSafeOldStack(slot);
 
+                    //only if new items are less or equal (crafting table output for example)
                     if (newMouseStack != null && oldMouseStack != null && newMouseStack.getCount() - oldMouseStack.getCount() <= 0) {
                         SmoothSwapping.clickSwapStack = slot;
                     }
@@ -90,7 +92,7 @@ public class ClickSlotPacketMixin {
             }
         }
     }
-    
+
     @Unique
     private ItemStack smooth_Swapping$getSafeOldStack(int slot) {
         DefaultedList<ItemStack> oldStacks = SmoothSwapping.oldStacks;
