@@ -10,7 +10,7 @@ displayName = "Smooth Swapping" #mandatory
 logoFile = "assets/smoothswapping/icon.png" #optional
 #credits="Thanks for this example mod goes to Java" #optional
 # A text field displayed in the mod UI
-authors="Schauweg" #optional
+authors="Schauweg, Riflusso" #optional
 description = '''
 Moves items smoothly in inventories
 '''
@@ -28,7 +28,7 @@ side = "BOTH"
 modId = "minecraft"
 mandatory = true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange = "[1.21.2,)"
+versionRange = "[1.21.6,)"
 ordering = "NONE"
 side = "BOTH"
 

@@ -4,6 +4,7 @@ import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.mixin.SimpleInventoryAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -61,18 +62,18 @@ public class InventoryWidget extends ClickableWidget {
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
 
         //Render Border
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX(), this.getY(), 0, 0, borderWidth, height - borderWidth, 256, 256); //left border
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX(), this.getY() + height - borderWidth, 0, textureHeight - borderWidth, borderWidth, borderWidth, 256, 256); //bottom left corner
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX() + borderWidth, this.getY(), borderWidth, 0, width - 2 * borderWidth, borderWidthTop, 256, 256); //top border
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX() + width - borderWidth, this.getY(), textureWidth - borderWidth, 0, borderWidth, height - borderWidth, 256, 256); //right border
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX() + width - borderWidth, this.getY() + height - borderWidth, textureWidth - borderWidth, textureHeight - borderWidth, borderWidth, borderWidth, 256, 256); //bottom right corner
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX() + borderWidth, this.getY() + height - borderWidth, borderWidth, textureHeight - borderWidth, width - 2 * borderWidth, borderWidth, 256, 256); //bottom border
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX() + borderWidth, this.getY() + borderWidthTop + (rows - 1) * slotHeight, borderWidth, 125, width - 2 * borderWidth, splitterHeight, 256, 256); //splitter
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX(), this.getY(), 0, 0, borderWidth, height - borderWidth, 256, 256); //left border
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX(), this.getY() + height - borderWidth, 0, textureHeight - borderWidth, borderWidth, borderWidth, 256, 256); //bottom left corner
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() + borderWidth, this.getY(), borderWidth, 0, width - 2 * borderWidth, borderWidthTop, 256, 256); //top border
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() + width - borderWidth, this.getY(), textureWidth - borderWidth, 0, borderWidth, height - borderWidth, 256, 256); //right border
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() + width - borderWidth, this.getY() + height - borderWidth, textureWidth - borderWidth, textureHeight - borderWidth, borderWidth, borderWidth, 256, 256); //bottom right corner
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() + borderWidth, this.getY() + height - borderWidth, borderWidth, textureHeight - borderWidth, width - 2 * borderWidth, borderWidth, 256, 256); //bottom border
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() + borderWidth, this.getY() + borderWidthTop + (rows - 1) * slotHeight, borderWidth, 125, width - 2 * borderWidth, splitterHeight, 256, 256); //splitter
 
         //Render slots texture
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
-                context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, this.getX() + borderWidth + column * slotHeight, this.getY() + borderWidthTop + row * slotHeight + (row == rows - 1 ? splitterHeight : 0), borderWidth, borderWidthTop, slotHeight, slotHeight, 256, 256);
+                context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX() + borderWidth + column * slotHeight, this.getY() + borderWidthTop + row * slotHeight + (row == rows - 1 ? splitterHeight : 0), borderWidth, borderWidthTop, slotHeight, slotHeight, 256, 256);
             }
         }
 
@@ -86,15 +87,15 @@ public class InventoryWidget extends ClickableWidget {
         context.drawText(textRenderer, trimmedName.getString(), this.getX() + 8, this.getY() + 6, 4210752, false);
 
         for (Slot slot : this.slots) {
-            if (slot.isEnabled()) {
-                this.drawSlot(context, slot);
-            }
-
             if (isPointOverSlot(slot, mouseX, mouseY) && slot.isEnabled()) {
                 this.focusedSlot = slot;
                 if (this.focusedSlot != null && this.focusedSlot.canBeHighlighted()) {
-                    context.drawGuiTexture(RenderLayer::getGuiTextured, SLOT_HIGHLIGHT_BACK_TEXTURE, this.focusedSlot.x - 4, this.focusedSlot.y - 4, 24, 24);
+                    context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_TEXTURE, this.focusedSlot.x - 4, this.focusedSlot.y - 4, 24, 24);
                 }
+            }
+
+            if (slot.isEnabled()) {
+                this.drawSlot(context, slot);
             }
         }
 
