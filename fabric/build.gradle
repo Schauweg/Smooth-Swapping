@@ -84,7 +84,7 @@ publishing {
     }
 }
 
-def CHANGELOG = new File(rootProject.projectDir.getAbsolutePath(), "CHANGELOG.MD").text
+def CHANGELOG = new File(rootProject.projectDir.getAbsolutePath(), "CHANGELOG.md").text
 def SUPPORTED_VERSIONS = Arrays.asList(project.supported_versions.split(','))
 
 unifiedPublishing {
