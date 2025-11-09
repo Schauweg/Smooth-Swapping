@@ -2,11 +2,14 @@ package dev.shwg.smoothswapping.config;
 
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
-//import dev.shwg.smoothswapping.mixin.ClickableWidgetAccessor;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
+import net.minecraft.client.gui.tooltip.TooltipState;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
@@ -26,6 +29,7 @@ public class CatmullRomWidget extends ClickableWidget {
     private List<Vec2> points;
     Integer hoveredPointIndex = null;
     private final int borderSize, gridWidth, gridHeight, verticalLines, horizontalLines;
+    private final CMRTooltipState tooltipState;
 
     private double oldMouseX = 0, oldMouseY = 0;
 
@@ -37,8 +41,9 @@ public class CatmullRomWidget extends ClickableWidget {
         this.gridWidth = gridWidth;
         this.verticalLines = verticalLines;
         this.horizontalLines = horizontalLines;
-        this.setTooltip(Tooltip.of(Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
-        this.setTooltipDelay(Duration.ofMillis(1000));
+        this.tooltipState = new CMRTooltipState(this);
+        this.tooltipState.setTooltip(Tooltip.of(Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
+        this.tooltipState.setDelay(Duration.ofMillis(1000));
     }
 
     @Override
@@ -46,7 +51,7 @@ public class CatmullRomWidget extends ClickableWidget {
 
         //workaround because overriding mouseMoved doesn't work
         //hide tooltip when mouse is moved again
-        if (mouseX != oldMouseX || mouseY != oldMouseY){
+        if (mouseX != oldMouseX || mouseY != oldMouseY) {
             oldMouseX = mouseX;
             oldMouseY = mouseY;
 //            ((ClickableWidgetAccessor) this).setLastHoveredTime(Util.getMeasuringTimeMs());
@@ -97,6 +102,8 @@ public class CatmullRomWidget extends ClickableWidget {
                 context.fill(xC - 2, yC - 2, xC + 2, yC + 2, 0xFFC908FF);
             }
         }
+
+        tooltipState.render(this.isHovered(), this.isFocused(), this.getNavigationFocus());
     }
 
     @Override
@@ -143,7 +150,7 @@ public class CatmullRomWidget extends ClickableWidget {
         return this.points;
     }
 
-    public void reset(){
+    public void reset() {
         List<Vec2> points = new ArrayList<>();
         points.add(new Vec2(0, 0));
         points.add(new Vec2(0, 0));
@@ -267,12 +274,57 @@ public class CatmullRomWidget extends ClickableWidget {
         }
     }
 
+    public static class CMRTooltipState extends TooltipState {
+        @Nullable
+        private Tooltip tooltip;
+        private Duration delay = Duration.ZERO;
+        private long renderCheckTime;
+        private boolean prevShouldRender;
+        private final CatmullRomWidget widget;
+
+        public CMRTooltipState(CatmullRomWidget widget) {
+            this.widget = widget;
+        }
+
+        @Override
+        public void setTooltip(@Nullable Tooltip tooltip) {
+            this.tooltip = tooltip;
+        }
+
+        @Override
+        public void setDelay(Duration delay) {
+            this.delay = delay;
+        }
+
+        @Override
+        public void render(boolean hovered, boolean focused, ScreenRect focus) {
+            if (tooltip == null) {
+                prevShouldRender = false;
+                return;
+            }
+
+            boolean shouldRender = hovered || (focused && MinecraftClient.getInstance().getNavigationType().isKeyboard());
+            if (shouldRender != prevShouldRender) {
+                if (shouldRender)
+                    renderCheckTime = Util.getMeasuringTimeMs();
+                prevShouldRender = shouldRender;
+            }
+
+            if (shouldRender && Util.getMeasuringTimeMs() - renderCheckTime > delay.toMillis()) {
+                Screen screen = MinecraftClient.getInstance().currentScreen;
+                if (screen != null) {
+                    screen.setTooltip(tooltip, new CMRTooltipPosition(widget), focused);
+                }
+            }
+        }
+    }
+
     public static class CMRTooltipPosition implements TooltipPositioner {
 
         private final CatmullRomWidget widget;
         private final int xOffset = 10;
 
-        public CMRTooltipPosition(CatmullRomWidget widget){
+        public CMRTooltipPosition(CatmullRomWidget widget) {
             this.widget = widget;
         }
 
@@ -281,7 +333,7 @@ public class CatmullRomWidget extends ClickableWidget {
             Vector2i vector2i = new Vector2i();
             vector2i.x = x + xOffset;
             vector2i.y = y - height;
-            if (vector2i.y + height> screenHeight) {
+            if (vector2i.y + height > screenHeight) {
                 vector2i.y = this.widget.getY() - height - 1;
             }
 
