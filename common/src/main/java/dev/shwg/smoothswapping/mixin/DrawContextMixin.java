@@ -43,6 +43,9 @@ public abstract class DrawContextMixin {
     @Shadow
     private MinecraftClient client;
 
+    @Unique
+    private static boolean smooth_Swapping$isRendering = false;
+
     @Shadow
     public abstract void drawItem(ItemStack item, int x, int y);
 
@@ -51,14 +54,19 @@ public abstract class DrawContextMixin {
 
     @Inject(method = "drawItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;III)V", at = @At("HEAD"), cancellable = true)
     public void onItemDraw(LivingEntity entity, World world, ItemStack stack, int x, int y, int seed, CallbackInfo cbi) {
-        if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
-
-        if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
+        if (smooth_Swapping$isRendering) return;
 
         try {
+            smooth_Swapping$isRendering = true;
+
+            if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
+            if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
+
             smooth_Swapping$doSwap(stack, x, y, cbi);
         } catch (Exception e) {
             SwapUtil.reset();
+        } finally {
+            smooth_Swapping$isRendering = false;
         }
     }
 
