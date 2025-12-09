@@ -43,7 +43,8 @@ public class ConfigScreen extends Screen {
                 (optionText, value) -> Text.translatable("smoothswapping.config.option.animationspeed.speed").append(": ").append(Text.literal(value + "%")),
                 (new SimpleOption.ValidatingIntSliderCallbacks(1, 50)).withModifier(
                         (value) -> value * 10,
-                        (value) -> value / 10),
+                        (value) -> value / 10,
+                        true),
                 Codec.intRange(10, 500),
                 config.getAnimationSpeed(),
                 (value) -> config.setAnimationSpeed(value));
