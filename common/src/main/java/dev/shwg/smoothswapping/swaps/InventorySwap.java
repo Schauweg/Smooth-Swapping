@@ -1,7 +1,7 @@
 package dev.shwg.smoothswapping.swaps;
 
 import dev.shwg.smoothswapping.Vec2;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class InventorySwap {
 

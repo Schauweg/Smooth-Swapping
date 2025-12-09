@@ -5,8 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.shwg.smoothswapping.config.ConfigManager;
 import dev.shwg.smoothswapping.swaps.InventorySwap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,7 +24,7 @@ public class SmoothSwapping {
     public static boolean clickSwap;
     public static Short clickSwapStack;
     public static Map<Integer, List<InventorySwap>> swaps;
-    public static DefaultedList<ItemStack> oldStacks, currentStacks;
+    public static NonNullList<ItemStack> oldStacks, currentStacks;
     public static ItemStack oldCursorStack;
     public static AtomicReference<ItemStack> currentCursorStack = new AtomicReference<>(null);
     public static final ReentrantLock currentCursorStackLock = new ReentrantLock();
@@ -32,7 +32,7 @@ public class SmoothSwapping {
     public static void init() {
         ConfigManager.initializeConfig();
         swaps = new HashMap<>();
-        oldStacks = DefaultedList.of();
-        currentStacks = DefaultedList.of();
+        oldStacks = NonNullList.create();
+        currentStacks = NonNullList.create();
     }
 }

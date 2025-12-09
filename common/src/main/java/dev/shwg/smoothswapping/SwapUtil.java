@@ -3,11 +3,11 @@ package dev.shwg.smoothswapping;
 import dev.shwg.smoothswapping.swaps.InventorySwap;
 import dev.shwg.smoothswapping.swaps.ItemToCursorInventorySwap;
 import dev.shwg.smoothswapping.swaps.ItemToItemInventorySwap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,24 +58,24 @@ public class SwapUtil {
     public static void addI2IInventorySwap(int index, Slot fromSlot, Slot toSlot, boolean checked, int amount) {
         List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(index, new ArrayList<>());
 
-        if (ItemStack.areItemsEqual(toSlot.getStack(), Items.AIR.getDefaultStack()))
+        if (ItemStack.isSameItem(toSlot.getItem(), Items.AIR.getDefaultInstance()))
             return;
 
-        ItemStack swapStack = toSlot.getStack().copy();
+        ItemStack swapStack = toSlot.getItem().copy();
         ((ItemStackAccessor) (Object) swapStack).smooth_Swapping$setIsSwapStack(true);
 
         swaps.add(new ItemToItemInventorySwap(fromSlot, toSlot, checked, amount, swapStack));
         SmoothSwapping.swaps.put(index, swaps);
     }
 
-    public static void assignI2CSwaps(List<SwapStacks> lessStacks, Vec2 mousePos, ScreenHandler handler) {
-        ItemStack cursorStack = handler.getCursorStack();
+    public static void assignI2CSwaps(List<SwapStacks> lessStacks, Vec2 mousePos, AbstractContainerMenu handler) {
+        ItemStack cursorStack = handler.getCarried();
 
         for (SwapStacks lessStack : lessStacks) {
             Slot lessSlot = handler.getSlot(lessStack.getSlotID());
             List<InventorySwap> swaps = SmoothSwapping.swaps.getOrDefault(ASSUME_CURSOR_STACK_SLOT_INDEX, new ArrayList<>());
 
-            if (ItemStack.areItemsEqual(cursorStack, Items.AIR.getDefaultStack()))
+            if (ItemStack.isSameItem(cursorStack, Items.AIR.getDefaultInstance()))
                 return;
 
             ItemStack swapStack = lessStack.getOldStack().copy();
@@ -86,7 +86,7 @@ public class SwapUtil {
         }
     }
 
-    public static void assignI2ISwaps(List<SwapStacks> moreStacks, List<SwapStacks> lessStacks, ScreenHandler handler){
+    public static void assignI2ISwaps(List<SwapStacks> moreStacks, List<SwapStacks> lessStacks, AbstractContainerMenu handler){
         for (int i = 0; i < moreStacks.size(); i++) {
             SwapStacks moreStack = moreStacks.get(i);
             if (moreStack.itemCountToChange == 0){
@@ -108,12 +108,12 @@ public class SwapUtil {
                     }
 
                     Slot lessSlot = handler.getSlot(lessStack.getSlotID());
-                    addI2IInventorySwap(moreStack.getSlotID(), lessSlot, moreSlot, ItemStack.areItemsEqual(moreStack.getOldStack(), moreStack.getNewStack()), amount);
+                    addI2IInventorySwap(moreStack.getSlotID(), lessSlot, moreSlot, ItemStack.isSameItem(moreStack.getOldStack(), moreStack.getNewStack()), amount);
                     if (lessStack.itemCountToChange == 0){
                         lessStacks.remove(lessStack);
                     }
                     if (moreStack.itemCountToChange == 0){
-                            break;
+                        break;
                     }
                 }
             }
@@ -121,10 +121,10 @@ public class SwapUtil {
     }
 
     public static int getCount(ItemStack stack) {
-        return ItemStack.areItemsEqual(stack, Items.AIR.getDefaultStack()) ? 0 : stack.getCount();
+        return ItemStack.isSameItem(stack, Items.AIR.getDefaultInstance()) ? 0 : stack.getCount();
     }
 
-    public static void copyStacks(DefaultedList<ItemStack> src, DefaultedList<ItemStack> dst) {
+    public static void copyStacks(NonNullList<ItemStack> src, NonNullList<ItemStack> dst) {
         dst.clear();
         src.stream().map(ItemStack::copy).forEach(dst::add);
     }

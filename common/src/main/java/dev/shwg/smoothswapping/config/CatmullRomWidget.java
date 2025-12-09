@@ -2,18 +2,18 @@ package dev.shwg.smoothswapping.config;
 
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenRect;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.tooltip.TooltipPositioner;
-import net.minecraft.client.gui.tooltip.TooltipState;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetTooltipHolder;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CatmullRomWidget extends ClickableWidget {
+public class CatmullRomWidget extends AbstractWidget {
 
     private List<Vec2> points;
     Integer hoveredPointIndex = null;
@@ -35,7 +35,7 @@ public class CatmullRomWidget extends ClickableWidget {
     private double oldMouseX = 0, oldMouseY = 0;
 
     public CatmullRomWidget(int x, int y, int gridWidth, int gridHeight, int borderSize, int verticalLines, int horizontalLines, List<Vec2> points) {
-        super(x, y, gridWidth + 2 * borderSize, gridHeight + 2 * borderSize, ScreenTexts.EMPTY);
+        super(x, y, gridWidth + 2 * borderSize, gridHeight + 2 * borderSize, CommonComponents.EMPTY);
         this.points = points;
         this.borderSize = borderSize;
         this.gridHeight = gridHeight;
@@ -43,12 +43,12 @@ public class CatmullRomWidget extends ClickableWidget {
         this.verticalLines = verticalLines;
         this.horizontalLines = horizontalLines;
         this.tooltipState = new CMRTooltipState(this);
-        this.tooltipState.setTooltip(Tooltip.of(Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
+        this.tooltipState.set(Tooltip.create(Component.translatable("smoothswapping.config.option.animationspeed.tooltip")));
         this.tooltipState.setDelay(Duration.ofMillis(1000));
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
         //workaround because overriding mouseMoved doesn't work
         //hide tooltip when mouse is moved again
@@ -64,17 +64,17 @@ public class CatmullRomWidget extends ClickableWidget {
 
         for (int i = 0; i < verticalLines; i++) {
             int stepSize = this.gridWidth / verticalLines;
-            context.drawVerticalLine(this.getX() + this.borderSize + stepSize + i * stepSize, this.getY() + borderSize, this.getY() + this.borderSize + this.gridHeight, 0x10FFFFFF);
+            context.vLine(this.getX() + this.borderSize + stepSize + i * stepSize, this.getY() + borderSize, this.getY() + this.borderSize + this.gridHeight, 0x10FFFFFF);
         }
 
         for (int i = 0; i < horizontalLines; i++) {
             int stepSize = this.gridHeight / horizontalLines;
 
-            context.drawHorizontalLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
+            context.hLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
         }
 
-        context.drawVerticalLine(this.getX() + this.borderSize, this.getY() + this.borderSize, this.getY() + this.borderSize + gridHeight, 0xFFFFFFFF);
-        context.drawHorizontalLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + this.gridHeight, 0xFFFFFFFF);
+        context.vLine(this.getX() + this.borderSize, this.getY() + this.borderSize, this.getY() + this.borderSize + gridHeight, 0xFFFFFFFF);
+        context.hLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + this.gridHeight, 0xFFFFFFFF);
 
         for (int i = 1; i < points.size() - 2; i++) {
             Vec2 p0 = points.get(i - 1);
@@ -104,11 +104,11 @@ public class CatmullRomWidget extends ClickableWidget {
             }
         }
 
-        tooltipState.render(context, mouseX, mouseY, this.isHovered(), this.isFocused(), this.getNavigationFocus());
+        tooltipState.refreshTooltipForNextRenderPass(context, mouseX, mouseY, this.isHovered(), this.isFocused(), this.getRectangle());
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == 1) {
             if (hoveredPointIndex != null) {
                 this.points.remove((int) hoveredPointIndex);
@@ -120,7 +120,7 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    protected void onDrag(Click click, double deltaX, double deltaY) {
+    protected void onDrag(MouseButtonEvent click, double deltaX, double deltaY) {
         if (hoveredPointIndex != null) {
             Vec2 hoveredPoint = this.points.get(hoveredPointIndex);
             double newX = getPointX(click.x());
@@ -133,7 +133,7 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+    public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
         if (hoveredPointIndex != null) {
             this.onDrag(click, deltaX, deltaY);
             return true;
@@ -143,7 +143,7 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
 
     }
 
@@ -199,7 +199,7 @@ public class CatmullRomWidget extends ClickableWidget {
         return (borderSize - globalY + gridHeight + this.getY() - 1) / gridHeight;
     }
 
-    private void drawPixel(DrawContext context, int x, int y, int color) {
+    private void drawPixel(GuiGraphics context, int x, int y, int color) {
         context.fill(x, y, x + 1, y + 1, color);
     }
 
@@ -275,7 +275,7 @@ public class CatmullRomWidget extends ClickableWidget {
         }
     }
 
-    public static class CMRTooltipState extends TooltipState {
+    public static class CMRTooltipState extends WidgetTooltipHolder {
         @Nullable
         private Tooltip tooltip;
         private Duration delay = Duration.ZERO;
@@ -288,7 +288,7 @@ public class CatmullRomWidget extends ClickableWidget {
         }
 
         @Override
-        public void setTooltip(@Nullable Tooltip tooltip) {
+        public void set(@Nullable Tooltip tooltip) {
             this.tooltip = tooltip;
         }
 
@@ -298,30 +298,30 @@ public class CatmullRomWidget extends ClickableWidget {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, boolean focused, ScreenRect navigationFocus) {
+        public void refreshTooltipForNextRenderPass(GuiGraphics context, int mouseX, int mouseY, boolean hovered, boolean focused, ScreenRectangle navigationFocus) {
             if (tooltip == null) {
                 prevShouldRender = false;
                 return;
             }
 
-            MinecraftClient minecraftClient = MinecraftClient.getInstance();
-            boolean shouldRender = hovered || (focused && minecraftClient.getNavigationType().isKeyboard());
+            Minecraft minecraftClient = Minecraft.getInstance();
+            boolean shouldRender = hovered || (focused && minecraftClient.getLastInputType().isKeyboard());
             if (shouldRender != prevShouldRender) {
                 if (shouldRender)
-                    renderCheckTime = Util.getMeasuringTimeMs();
+                    renderCheckTime = Util.getMillis();
                 prevShouldRender = shouldRender;
             }
 
-            if (shouldRender && Util.getMeasuringTimeMs() - renderCheckTime > delay.toMillis()) {
-                Screen screen = MinecraftClient.getInstance().currentScreen;
+            if (shouldRender && Util.getMillis() - renderCheckTime > delay.toMillis()) {
+                Screen screen = Minecraft.getInstance().screen;
                 if (screen != null) {
-                    context.drawTooltip(minecraftClient.textRenderer, this.tooltip.getLines(minecraftClient), new CMRTooltipPosition(widget), mouseX, mouseY, focused);
+                    context.setTooltipForNextFrame(minecraftClient.font, this.tooltip.toCharSequence(minecraftClient), new CMRTooltipPosition(widget), mouseX, mouseY, focused);
                 }
             }
         }
     }
 
-    public static class CMRTooltipPosition implements TooltipPositioner {
+    public static class CMRTooltipPosition implements ClientTooltipPositioner {
 
         private final CatmullRomWidget widget;
         private final int xOffset = 10;
@@ -331,7 +331,7 @@ public class CatmullRomWidget extends ClickableWidget {
         }
 
         @Override
-        public Vector2ic getPosition(int screenWidth, int screenHeight, int x, int y, int width, int height) {
+        public Vector2ic positionTooltip(int screenWidth, int screenHeight, int x, int y, int width, int height) {
             Vector2i vector2i = new Vector2i();
             vector2i.x = x + xOffset;
             vector2i.y = y - height;

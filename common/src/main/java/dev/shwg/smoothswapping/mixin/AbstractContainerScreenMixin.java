@@ -5,15 +5,15 @@ import dev.shwg.smoothswapping.SwapStacks;
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
 import dev.shwg.smoothswapping.config.ConfigManager;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,21 +30,21 @@ import java.util.Map;
 import static dev.shwg.smoothswapping.SmoothSwapping.oldCursorStack;
 import static dev.shwg.smoothswapping.SwapUtil.getCount;
 
-@Mixin(HandledScreen.class)
-public abstract class HandledScreenMixin {
+@Mixin(AbstractContainerScreen.class)
+public abstract class AbstractContainerScreenMixin {
 
     @Shadow
     @Final
-    protected ScreenHandler handler;
+    protected AbstractContainerMenu menu;
 
     @Shadow
-    protected int x, y;
+    protected int leftPos, topPos;
 
     @Unique
     private Screen smooth_Swapping$currentScreen = null;
 
     @Inject(method = "render", at = @At("HEAD"))
-    public void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    public void onRender(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         try {
             smooth_Swapping$doRender(mouseX, mouseY);
         } catch (Exception e) {
@@ -58,21 +58,21 @@ public abstract class HandledScreenMixin {
             return;
 
         @SuppressWarnings({"rawtypes", "DataFlowIssue"})
-        HandledScreen handledScreen = (HandledScreen) (Object) this;
+        AbstractContainerScreen handledScreen = (AbstractContainerScreen) (Object) this;
 
-        if (handledScreen instanceof CreativeInventoryScreen) return;
+        if (handledScreen instanceof CreativeModeInventoryScreen) return;
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
-        if (client.player == null || client.player.currentScreenHandler == null) {
+        if (client.player == null || client.player.containerMenu == null) {
             return;
         }
 
-        SmoothSwapping.currentStacks = client.player.currentScreenHandler.getStacks();
+        SmoothSwapping.currentStacks = client.player.containerMenu.getItems();
 
         try {
             SmoothSwapping.currentCursorStackLock.lock();
-            ItemStack cursorStack = client.player.currentScreenHandler.getCursorStack();
+            ItemStack cursorStack = client.player.containerMenu.getCarried();
             ItemStack prevStack = SmoothSwapping.currentCursorStack.get();
             if (
                     prevStack == null
@@ -85,7 +85,7 @@ public abstract class HandledScreenMixin {
             SmoothSwapping.currentCursorStackLock.unlock();
         }
 
-        Screen screen = client.currentScreen;
+        Screen screen = client.screen;
 
         if (SmoothSwapping.clickSwap) {
             SmoothSwapping.clickSwap = false;
@@ -115,26 +115,26 @@ public abstract class HandledScreenMixin {
 
                     //whether the stack got more items or less and if slot is output slot
                     if (getCount(newStack) > getCount(oldStack)
-                            && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player)) {
+                            && menu.getSlot(slotID).allowModification(Minecraft.getInstance().player)) {
                         moreStacks.add(new SwapStacks(slotID, oldStack, newStack, getCount(oldStack) - getCount(newStack)));
                         totalAmount += getCount(newStack) - getCount(oldStack);
                     } else if (getCount(newStack) < getCount(oldStack)
-                            && handler.getSlot(slotID).canTakePartial(MinecraftClient.getInstance().player)
+                            && menu.getSlot(slotID).allowModification(Minecraft.getInstance().player)
                             && SmoothSwapping.clickSwapStack == null) {
                         lessStacks.add(new SwapStacks(slotID, oldStack, newStack, getCount(oldStack) - getCount(newStack)));
                     }
                 }
                 if (SmoothSwapping.clickSwapStack != null) {
                     lessStacks.clear();
-                    ItemStack newStack = handler.getSlot(SmoothSwapping.clickSwapStack).getStack();
+                    ItemStack newStack = menu.getSlot(SmoothSwapping.clickSwapStack).getItem();
                     ItemStack oldStack = SmoothSwapping.oldStacks.get(SmoothSwapping.clickSwapStack);
                     lessStacks.add(new SwapStacks(SmoothSwapping.clickSwapStack, oldStack, newStack, totalAmount));
                     SmoothSwapping.clickSwapStack = null;
                 }
                 if (moreStacks.isEmpty()) {
-                    SwapUtil.assignI2CSwaps(lessStacks, new Vec2(mouseX - x, mouseY - y), handler);
+                    SwapUtil.assignI2CSwaps(lessStacks, new Vec2(mouseX - leftPos, mouseY - topPos), menu);
                 } else {
-                    SwapUtil.assignI2ISwaps(moreStacks, lessStacks, handler);
+                    SwapUtil.assignI2ISwaps(moreStacks, lessStacks, menu);
                 }
             } else if (changedStacksSize == 1) {
                 ItemStack currentCursorStack = SmoothSwapping.currentCursorStack.get();
@@ -156,7 +156,7 @@ public abstract class HandledScreenMixin {
                                         || currentStack.getItem() == Items.AIR
                         ) {
                             SwapStacks lessStack = new SwapStacks(changedStack.getKey(), oldStack, currentStack, getCount(oldStack) - getCount(currentStack));
-                            SwapUtil.assignI2CSwaps(List.of(lessStack), new Vec2(mouseX - x, mouseY - y), handler);
+                            SwapUtil.assignI2CSwaps(List.of(lessStack), new Vec2(mouseX - leftPos, mouseY - topPos), menu);
                         }
                     });
                 }
@@ -170,12 +170,12 @@ public abstract class HandledScreenMixin {
     }
 
     @Unique
-    private Map<Integer, ItemStack> smooth_Swapping$getChangedStacks(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
+    private Map<Integer, ItemStack> smooth_Swapping$getChangedStacks(NonNullList<ItemStack> oldStacks, NonNullList<ItemStack> newStacks) {
         Map<Integer, ItemStack> changedStacks = new HashMap<>();
         for (int slotID = 0; slotID < oldStacks.size(); slotID++) {
             ItemStack newStack = newStacks.get(slotID);
             ItemStack oldStack = oldStacks.get(slotID);
-            if (!ItemStack.areEqual(oldStack, newStack)) {
+            if (!ItemStack.matches(oldStack, newStack)) {
                 changedStacks.put(slotID, newStack.copy());
             }
         }
@@ -183,14 +183,14 @@ public abstract class HandledScreenMixin {
     }
 
     @Unique
-    private boolean smooth_Swapping$areStacksEqual(DefaultedList<ItemStack> oldStacks, DefaultedList<ItemStack> newStacks) {
+    private boolean smooth_Swapping$areStacksEqual(NonNullList<ItemStack> oldStacks, NonNullList<ItemStack> newStacks) {
         if (oldStacks == null || newStacks == null || (oldStacks.size() != newStacks.size())) {
             return false;
         } else {
             for (int slotID = 0; slotID < oldStacks.size(); slotID++) {
                 ItemStack newStack = newStacks.get(slotID);
                 ItemStack oldStack = oldStacks.get(slotID);
-                if (!ItemStack.areEqual(oldStack, newStack)) {
+                if (!ItemStack.matches(oldStack, newStack)) {
                     return false;
                 }
             }

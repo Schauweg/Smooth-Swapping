@@ -6,12 +6,12 @@
   "mixins": [
   ],
   "client": [
-    "ClickSlotPacketMixin",
-    "DrawContextMixin",
-    "HandledScreenMixin",
+    "AbstractContainerScreenMixin",
+    "AbstractRecipeBookScreenMixin",
+    "GuiGraphicsMixin",
     "ItemStackMixin",
-    "RecipeBookScreenMixin",
-    "SimpleInventoryAccessor"
+    "ServerboundContainerClickPacketMixin",
+    "SimpleContainerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

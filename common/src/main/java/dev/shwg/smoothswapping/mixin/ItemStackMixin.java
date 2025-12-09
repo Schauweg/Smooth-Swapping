@@ -1,7 +1,7 @@
 package dev.shwg.smoothswapping.mixin;
 
 import dev.shwg.smoothswapping.ItemStackAccessor;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 

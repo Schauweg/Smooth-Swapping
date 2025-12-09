@@ -9,15 +9,15 @@ import dev.shwg.smoothswapping.config.ConfigManager;
 import dev.shwg.smoothswapping.config.ConfigScreen;
 import dev.shwg.smoothswapping.swaps.InventorySwap;
 import dev.shwg.smoothswapping.swaps.ItemToCursorInventorySwap;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
 import org.spongepowered.asm.mixin.Final;
@@ -33,33 +33,33 @@ import java.util.List;
 import static dev.shwg.smoothswapping.SmoothSwapping.ASSUME_CURSOR_STACK_SLOT_INDEX;
 import static dev.shwg.smoothswapping.SwapUtil.swapListIndexOf;
 
-@Mixin(DrawContext.class)
-public abstract class DrawContextMixin {
+@Mixin(GuiGraphics.class)
+public abstract class GuiGraphicsMixin {
 
     @Final
     @Shadow
-    private Matrix3x2fStack matrices;
+    private Matrix3x2fStack pose;
     @Final
     @Shadow
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
     @Unique
     private static boolean smooth_Swapping$isRendering = false;
 
     @Shadow
-    public abstract void drawItem(ItemStack item, int x, int y);
+    public abstract void renderItem(ItemStack item, int x, int y);
 
     @Shadow
-    public abstract void drawStackOverlay(TextRenderer textRenderer, ItemStack stack, int x, int y, @Nullable String countOverride);
+    public abstract void renderItemDecorations(Font textRenderer, ItemStack stack, int x, int y, @Nullable String countOverride);
 
-    @Inject(method = "drawItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;III)V", at = @At("HEAD"), cancellable = true)
-    public void onItemDraw(LivingEntity entity, World world, ItemStack stack, int x, int y, int seed, CallbackInfo cbi) {
+    @Inject(method = "renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;III)V", at = @At("HEAD"), cancellable = true)
+    public void onItemDraw(LivingEntity entity, Level world, ItemStack stack, int x, int y, int seed, CallbackInfo cbi) {
         if (smooth_Swapping$isRendering) return;
 
         try {
             smooth_Swapping$isRendering = true;
 
-            if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
+            if (smooth_Swapping$isHotbar() && !(minecraft.screen instanceof ConfigScreen)) return;
             if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
 
             smooth_Swapping$doSwap(stack, x, y, cbi);
@@ -101,7 +101,7 @@ public abstract class DrawContextMixin {
 
             //whether the destination slot should be rendered
             if (renderDestinationSlot) {
-                drawItem(stack.copy(), x, y);
+                renderItem(stack.copy(), x, y);
             }
             if (swapList.isEmpty())
                 SmoothSwapping.swaps.remove(index);
@@ -115,9 +115,9 @@ public abstract class DrawContextMixin {
 
             if (!swapList.isEmpty()) {
                 if (swapListIndexOf(swapList, (swap) -> ((ItemToCursorInventorySwap) swap).getCopiedStackHash() == stack.hashCode()) == -1) {
-                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                    ScreenHandler handler = null;
-                    if (player != null) handler = player.currentScreenHandler;
+                    LocalPlayer player = Minecraft.getInstance().player;
+                    AbstractContainerMenu handler = null;
+                    if (player != null) handler = player.containerMenu;
                     //LOGGER.info("cursor stack hash: " + handler.getCursorStack().hashCode());
 
                     for (InventorySwap inventorySwap : swapList) { // assign initial renders
@@ -128,10 +128,10 @@ public abstract class DrawContextMixin {
                             swap.setStartedRender(true);
                         } else if (!swap.isArrived()) {
                             if (handler != null) {
-                                DefaultedList<ItemStack> inventoryStacks = handler.getStacks();
+                                NonNullList<ItemStack> inventoryStacks = handler.getItems();
                                 //LOGGER.info("render stack: [" + stack +  ", " + stack.hashCode() + "], inventory stacks:" + sb);
                                 //LOGGER.info("target stack hash: " + swap.getTargetStackHash() + ", cursor stack hash: " + handler.getCursorStack().hashCode());
-                                if (swap.getTargetStackHash() == -1 || handler.getCursorStack().hashCode() == swap.getTargetStackHash()) {
+                                if (swap.getTargetStackHash() == -1 || handler.getCarried().hashCode() == swap.getTargetStackHash()) {
                                     if (!inventoryStacks.contains(stack)) { // now rendering cursor stack from parent
                                         ItemStack copiedStack = swap.getSwapItem().copy();
                                         swap.setCopiedStackHash(copiedStack.hashCode());
@@ -159,7 +159,7 @@ public abstract class DrawContextMixin {
 
     @Unique
     private void smooth_Swapping$renderSwap(InventorySwap swap, int x, int y, ItemStack copiedStack) {
-        float lastFrameDuration = client.getRenderTickCounter().getDynamicDeltaTicks();
+        float lastFrameDuration = minecraft.getDeltaTracker().getGameTimeDeltaTicks();
         Config config = ConfigManager.getConfig();
 
         double swapX = swap.getX();
@@ -175,21 +175,21 @@ public abstract class DrawContextMixin {
         double renderX = -swap.getStartX() - Math.cos(angle) * swap.getDistance() * ease;
         double renderY = swap.getStartY() + Math.sin(angle) * swap.getDistance() * ease;
 
-        matrices.pushMatrix();
-        matrices.translate((float) renderX, (float) -renderY);
+        pose.pushMatrix();
+        pose.translate((float) renderX, (float) -renderY);
 
-        drawItem(copiedStack, x, y);
+        renderItem(copiedStack, x, y);
 
         double speed = swap.getDistance() / 10 * config.getAnimationSpeedFormatted();
 
         swap.setX(swapX + lastFrameDuration * speed * Math.cos(angle));
         swap.setY(swapY + lastFrameDuration * speed * Math.sin(angle));
-        matrices.popMatrix();
+        pose.popMatrix();
     }
 
-    @Inject(method = "drawStackOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
-    public void onDrawItemInSlot(TextRenderer textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo cbi) {
-        if (smooth_Swapping$isHotbar() && !(client.currentScreen instanceof ConfigScreen)) return;
+    @Inject(method = "renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
+    public void onDrawItemInSlot(Font textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo cbi) {
+        if (smooth_Swapping$isHotbar() && !(minecraft.screen instanceof ConfigScreen)) return;
 
         if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
 
@@ -211,7 +211,7 @@ public abstract class DrawContextMixin {
             boolean renderToSlot = true;
 
             for (InventorySwap swap : swapList) {
-                if (!ItemStack.areItemsEqual(stack, swap.getSwapItem())) {
+                if (!ItemStack.isSameItem(stack, swap.getSwapItem())) {
                     SmoothSwapping.swaps.remove(index);
                     return;
                 }
@@ -221,7 +221,7 @@ public abstract class DrawContextMixin {
                     renderToSlot = false;
                 }
 
-                if (swap.getAmount() > 1 || stack.isItemBarVisible()) {
+                if (swap.getAmount() > 1 || stack.isBarVisible()) {
                     String amount = String.valueOf(swap.getAmount());
                     double swapX = swap.getX();
                     double swapY = swap.getY();
@@ -236,21 +236,21 @@ public abstract class DrawContextMixin {
                     double renderX = -swap.getStartX() - (Math.cos(angle) * swap.getDistance() * ease);
                     double renderY = swap.getStartY() + (Math.sin(angle) * swap.getDistance() * ease);
 
-                    matrices.pushMatrix();
-                    matrices.translate((float) renderX, (float) -renderY);
+                    pose.pushMatrix();
+                    pose.translate((float) renderX, (float) -renderY);
 
-                    if (stack.isItemBarVisible())
-                        drawStackOverlay(client.textRenderer, stack.copy(), x, y, null);
+                    if (stack.isBarVisible())
+                        renderItemDecorations(minecraft.font, stack.copy(), x, y, null);
                     else
-                        drawStackOverlay(client.textRenderer, stack.copy(), x, y, amount);
+                        renderItemDecorations(minecraft.font, stack.copy(), x, y, amount);
 
-                    matrices.popMatrix();
+                    pose.popMatrix();
                 }
 
             }
 
             if (renderToSlot && stackCount > 1) {
-                drawStackOverlay(client.textRenderer, stack.copy(), x, y, String.valueOf(stackCount));
+                renderItemDecorations(minecraft.font, stack.copy(), x, y, String.valueOf(stackCount));
             }
             cbi.cancel();
         }
@@ -259,7 +259,7 @@ public abstract class DrawContextMixin {
 
     @Unique
     private boolean smooth_Swapping$isHotbar() {
-        float xOffset = matrices.m20();
+        float xOffset = pose.m20();
         return Math.round(xOffset) <= 0;
     }
 }
