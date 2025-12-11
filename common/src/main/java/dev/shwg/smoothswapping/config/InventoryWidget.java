@@ -18,13 +18,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
-import static dev.shwg.smoothswapping.SmoothSwapping.*;
+import static dev.shwg.smoothswapping.SmoothSwapping.currentStacks;
+import static dev.shwg.smoothswapping.SmoothSwapping.oldStacks;
 import static net.minecraft.client.gui.screen.ingame.HandledScreen.drawSlotHighlight;
 
 @SuppressWarnings("SuspiciousNameCombination")
 public class InventoryWidget extends ClickableWidget {
 
-    private static final Identifier TEXTURE = Identifier.of("textures/gui/container/generic_54.png");
+    private static final Identifier TEXTURE = new Identifier("textures/gui/container/generic_54.png");
 
     private static final int textureWidth = 176;
     private static final int textureHeight = 222;
@@ -57,7 +58,7 @@ public class InventoryWidget extends ClickableWidget {
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
 
         //Render Border
         context.drawTexture(TEXTURE, this.getX(), this.getY(), 0, 0, borderWidth, height - borderWidth); //left border

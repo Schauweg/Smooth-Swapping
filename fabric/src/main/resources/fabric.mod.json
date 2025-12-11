@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "Smooth Swapping",
   "description": "Moves the items in an inventory smoothly instead of instantly",
-  "authors": ["Schauweg"],
+  "authors": ["Schauweg, Riflusso"],
   "contact": {
     "homepage": "https://modrinth.com/mod/smooth-swapping",
     "sources": "https://github.com/Schauweg/Smooth-Swapping",
@@ -24,6 +24,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.14.21",
-    "minecraft": ">=1.21"
+    "minecraft": ">=1.20"
   }
 }

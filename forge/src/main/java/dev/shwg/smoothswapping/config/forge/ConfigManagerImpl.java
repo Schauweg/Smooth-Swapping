@@ -1,6 +1,6 @@
-package dev.shwg.smoothswapping.config.neoforge;
+package dev.shwg.smoothswapping.config.forge;
 
-import net.neoforged.fml.loading.FMLPaths;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
 

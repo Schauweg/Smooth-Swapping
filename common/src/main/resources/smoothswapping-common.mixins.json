@@ -2,15 +2,15 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.shwg.smoothswapping.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
   ],
   "client": [
     "ClickSlotPacketMixin",
     "DrawContextMixin",
     "HandledScreenMixin",
-    "SimpleInventoryAccessor",
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "SimpleInventoryAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
