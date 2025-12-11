@@ -7,8 +7,8 @@
   ],
   "client": [
     "ClickSlotPacketMixin",
-    "DrawContextMixin",
     "HandledScreenMixin",
+    "ItemRendererMixin",
     "ItemStackMixin",
     "SimpleInventoryAccessor"
   ],

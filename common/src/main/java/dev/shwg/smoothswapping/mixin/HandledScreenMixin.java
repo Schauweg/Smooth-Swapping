@@ -6,10 +6,10 @@ import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
 import dev.shwg.smoothswapping.config.ConfigManager;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
@@ -45,7 +45,7 @@ public abstract class HandledScreenMixin {
     private Screen smooth_Swapping$currentScreen = null;
 
     @Inject(method = "render", at = @At("HEAD"))
-    public void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    public void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         try {
             smooth_Swapping$doRender(mouseX, mouseY);
         } catch (Exception e) {
