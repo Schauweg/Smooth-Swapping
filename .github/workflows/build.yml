@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Artifacts-Forge
-          path: neoforge/build/libs/
+          path: forge/build/libs/
