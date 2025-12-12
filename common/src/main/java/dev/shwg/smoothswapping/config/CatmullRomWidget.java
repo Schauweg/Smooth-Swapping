@@ -2,18 +2,17 @@ package dev.shwg.smoothswapping.config;
 
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2i;
-import org.joml.Vector2ic;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,16 +26,62 @@ public class CatmullRomWidget extends ClickableWidget {
 
     private double oldMouseX = 0, oldMouseY = 0;
 
+    private final Text tooltipText;
+    private long hoverStartTime = 0;
+
     public CatmullRomWidget(int x, int y, int gridWidth, int gridHeight, int borderSize, int verticalLines, int horizontalLines, List<Vec2> points) {
-        super(x, y, gridWidth + 2 * borderSize, gridHeight + 2 * borderSize, ScreenTexts.EMPTY);
+        super(x, y, gridWidth + 2 * borderSize, gridHeight + 2 * borderSize, LiteralText.EMPTY);
         this.points = points;
         this.borderSize = borderSize;
         this.gridHeight = gridHeight;
         this.gridWidth = gridWidth;
         this.verticalLines = verticalLines;
         this.horizontalLines = horizontalLines;
-        this.setTooltip(Tooltip.of(Text.translatable("smoothswapping.config.option.animationspeed.tooltip")));
-        this.setTooltipDelay(1000);
+        this.tooltipText = new TranslatableText("smoothswapping.config.option.animationspeed.tooltip");
+    }
+
+    @Override
+    public void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
+        if (this.isHovered()) {
+            if (this.hoverStartTime == 0) {
+                this.hoverStartTime = System.currentTimeMillis();
+            }
+
+            if (System.currentTimeMillis() - this.hoverStartTime >= 1000) {
+                MinecraftClient client = MinecraftClient.getInstance();
+                Screen screen = client.currentScreen;
+                if (screen == null) return;
+
+                List<OrderedText> lines = client.textRenderer.wrapLines(this.tooltipText, 200);
+
+                if (lines.isEmpty()) return;
+
+                int tooltipWidth = 0;
+                int tooltipHeight = lines.size() == 1 ? -2 : 0;
+
+                for (OrderedText line : lines) {
+                    int k = client.textRenderer.getWidth(line);
+                    if (k > tooltipWidth) tooltipWidth = k;
+                    tooltipHeight += 10;
+                }
+
+                int xOffset = 10;
+                int renderX = mouseX + xOffset;
+                int renderY = mouseY - tooltipHeight;
+
+                if (renderY + tooltipHeight > screen.height) {
+                    renderY = this.y - tooltipHeight - 1;
+                }
+
+                if (renderX + tooltipWidth > screen.width) {
+                    renderX = Math.max(this.x + this.width - tooltipWidth - xOffset, 4);
+                }
+
+                screen.renderOrderedTooltip(matrices, lines, renderX - 12, renderY + 12);
+            }
+        } else {
+            this.hoverStartTime = 0;
+        }
     }
 
     @Override
@@ -51,21 +96,21 @@ public class CatmullRomWidget extends ClickableWidget {
 
         Collections.sort(this.points);
 
-        fill(matrices, this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xFA000000);
+        fill(matrices, x, y, x + this.width, y + this.height, 0xFA000000);
 
         for (int i = 0; i < verticalLines; i++) {
             int stepSize = this.gridWidth / verticalLines;
-            drawVerticalLine(matrices, this.getX() + this.borderSize + stepSize + i * stepSize, this.getY() + borderSize, this.getY() + this.borderSize + this.gridHeight, 0x10FFFFFF);
+            drawVerticalLine(matrices, x + this.borderSize + stepSize + i * stepSize, y + borderSize, y + this.borderSize + this.gridHeight, 0x10FFFFFF);
         }
 
         for (int i = 0; i < horizontalLines; i++) {
             int stepSize = this.gridHeight / horizontalLines;
 
-            drawHorizontalLine(matrices, this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
+            drawHorizontalLine(matrices, x + this.borderSize, x + this.borderSize + this.gridWidth, y + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
         }
 
-        drawVerticalLine(matrices, this.getX() + this.borderSize, this.getY() + this.borderSize, this.getY() + this.borderSize + gridHeight, 0xFFFFFFFF);
-        drawHorizontalLine(matrices, this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + this.gridHeight, 0xFFFFFFFF);
+        drawVerticalLine(matrices, x + this.borderSize, y + this.borderSize, y + this.borderSize + gridHeight, 0xFFFFFFFF);
+        drawHorizontalLine(matrices, x + this.borderSize, x + this.borderSize + this.gridWidth, y + this.borderSize + this.gridHeight, 0xFFFFFFFF);
 
         for (int i = 1; i < points.size() - 2; i++) {
             Vec2 p0 = points.get(i - 1);
@@ -76,8 +121,8 @@ public class CatmullRomWidget extends ClickableWidget {
             CatmullRomSpline spline = new CatmullRomSpline(p0, p1, p2, p3);
             for (float t = 0; t < 1; t += 0.005f) {
                 Vec2 point = spline.getSegment().getPoint(t);
-                int xC = (int) (this.getX() + borderSize + (point.v[0] * gridWidth)) + 1;
-                int yC = (int) (this.getY() + borderSize + gridHeight + -point.v[1] * gridHeight) - 1;
+                int xC = (int) (x + borderSize + (point.v[0] * gridWidth)) + 1;
+                int yC = (int) (y + borderSize + gridHeight + -point.v[1] * gridHeight) - 1;
                 drawPixel(matrices, xC, yC, 0xFFFF0000);
             }
         }
@@ -85,8 +130,8 @@ public class CatmullRomWidget extends ClickableWidget {
         hoveredPointIndex = hoveredPointIndex(mouseX, mouseY);
         for (int i = 1; i < points.size() - 1; i++) {
             Vec2 point = points.get(i);
-            int xC = (int) (this.getX() + borderSize + (point.v[0] * gridWidth)) + 1;
-            int yC = (int) (this.getY() + borderSize + gridHeight + -point.v[1] * gridHeight) - 1;
+            int xC = (int) (x + borderSize + (point.v[0] * gridWidth)) + 1;
+            int yC = (int) (y + borderSize + gridHeight + -point.v[1] * gridHeight) - 1;
 
             if (hoveredPointIndex != null && points.get(hoveredPointIndex).equals(point)) {
                 fill(matrices, xC - 2, yC - 2, xC + 2, yC + 2, 0xFFFFFF00);
@@ -132,13 +177,8 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    public void appendNarrations(NarrationMessageBuilder builder) {
 
-    }
-
-    @Override
-    protected TooltipPositioner getTooltipPositioner() {
-        return new CMRTooltipPosition(this);
     }
 
     public List<Vec2> getPoints() {
@@ -186,11 +226,11 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     private double getPointX(double globalX) {
-        return (-borderSize + globalX - this.getX() - 1) / gridWidth;
+        return (-borderSize + globalX - x - 1) / gridWidth;
     }
 
     private double getPointY(double globalY) {
-        return (borderSize - globalY + gridHeight + this.getY() - 1) / gridHeight;
+        return (borderSize - globalY + gridHeight + y - 1) / gridHeight;
     }
 
     private void drawPixel(MatrixStack matrices, int x, int y, int color) {
@@ -198,11 +238,11 @@ public class CatmullRomWidget extends ClickableWidget {
     }
 
     private boolean isMouseInGrid(double mouseX, double mouseY) {
-        return this.visible && mouseX > (double) this.getX() + this.borderSize + 1 && mouseX < (double) (this.getX() + this.borderSize + this.gridWidth - 1) && mouseY > (double) this.getY() + this.borderSize + 1 && mouseY < (double) (this.getY() + this.borderSize + this.gridHeight - 1);
+        return this.visible && mouseX > (double) x + this.borderSize + 1 && mouseX < (double) (x + this.borderSize + this.gridWidth - 1) && mouseY > (double) y + this.borderSize + 1 && mouseY < (double) (y + this.borderSize + this.gridHeight - 1);
     }
 
     private boolean isMouseInGridYExtended(double mouseX, double mouseY) {
-        return this.visible && mouseX > (double) this.getX() + this.borderSize + 1 && mouseX < (double) (this.getX() + this.borderSize + this.gridWidth - 1) && mouseY > (double) this.getY() + 1 && mouseY < (double) (this.getY() + this.height - 1);
+        return this.visible && mouseX > (double) x + this.borderSize + 1 && mouseX < (double) (x + this.borderSize + this.gridWidth - 1) && mouseY > (double) y + 1 && mouseY < (double) (y + this.height - 1);
     }
 
     @Nullable
@@ -214,8 +254,8 @@ public class CatmullRomWidget extends ClickableWidget {
             for (int i = 2; i < points.size() - 2; i++) {
                 Vec2 point = points.get(i);
 
-                int xC = (int) (this.getX() + this.borderSize + point.v[0] * this.gridWidth) - 1;
-                int yC = (int) (this.getY() + this.borderSize + this.gridHeight - point.v[1] * this.gridHeight) - pointWidth;
+                int xC = (int) (x + this.borderSize + point.v[0] * this.gridWidth) - 1;
+                int yC = (int) (y + this.borderSize + this.gridHeight - point.v[1] * this.gridHeight) - pointWidth;
 
                 if (mouseX >= (double) xC && mouseX < (double) (xC + pointWidth) && mouseY >= (double) yC && mouseY < (double) (yC + pointWidth)) {
                     return i;
@@ -266,32 +306,6 @@ public class CatmullRomWidget extends ClickableWidget {
             public Vec2 getPoint(double t) {
                 return Vec2.sum(a.copy().multiplyScalar(t * t * t).copy(), Vec2.sum(b.copy().multiplyScalar(t * t).copy(), Vec2.sum(c.copy().multiplyScalar(t).copy(), d)));
             }
-        }
-    }
-
-    public static class CMRTooltipPosition implements TooltipPositioner {
-
-        private final CatmullRomWidget widget;
-        private final int xOffset = 10;
-
-        public CMRTooltipPosition(CatmullRomWidget widget) {
-            this.widget = widget;
-        }
-
-        @Override
-        public Vector2ic getPosition(Screen screen, int x, int y, int width, int height) {
-            Vector2i vector2i = new Vector2i();
-            vector2i.x = x + xOffset;
-            vector2i.y = y - height;
-            if (vector2i.y + height > screen.height) {
-                vector2i.y = this.widget.getY() - height - 1;
-            }
-
-            if (vector2i.x + width > screen.width) {
-                vector2i.x = Math.max(this.widget.getX() + this.widget.getWidth() - width - xOffset, 4);
-            }
-
-            return vector2i;
         }
     }
 }

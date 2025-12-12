@@ -14,8 +14,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -45,7 +45,7 @@ public class InventoryWidget extends ClickableWidget {
     SimpleInventory inventory;
 
     public InventoryWidget(int x, int y, int columns, int rows, Text title) {
-        super(x, y, columns * slotHeight + 2 * borderWidth, rows * slotHeight + borderWidthTop + borderWidth + splitterHeight, ScreenTexts.EMPTY);
+        super(x, y, columns * slotHeight + 2 * borderWidth, rows * slotHeight + borderWidthTop + borderWidth + splitterHeight, LiteralText.EMPTY);
         this.title = title;
         this.columns = columns;
         this.rows = rows;
@@ -65,21 +65,21 @@ public class InventoryWidget extends ClickableWidget {
     public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 
         //Render Border
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        drawTexture(matrices, this.getX(), this.getY(), 0, 0, borderWidth, height - borderWidth); //left border
-        drawTexture(matrices, this.getX(), this.getY() + height - borderWidth, 0, textureHeight - borderWidth, borderWidth, borderWidth); //bottom left corner
-        drawTexture(matrices, this.getX() + borderWidth, this.getY(), borderWidth, 0, width - 2 * borderWidth, borderWidthTop); //top border
-        drawTexture(matrices, this.getX() + width - borderWidth, this.getY(), textureWidth - borderWidth, 0, borderWidth, height - borderWidth); //right border
-        drawTexture(matrices, this.getX() + width - borderWidth, this.getY() + height - borderWidth, textureWidth - borderWidth, textureHeight - borderWidth, borderWidth, borderWidth); //bottom right corner
-        drawTexture(matrices, this.getX() + borderWidth, this.getY() + height - borderWidth, borderWidth, textureHeight - borderWidth, width - 2 * borderWidth, borderWidth); //bottom border
-        drawTexture(matrices, this.getX() + borderWidth, this.getY() + borderWidthTop + (rows - 1) * slotHeight, borderWidth, 125, width - 2 * borderWidth, splitterHeight); //splitter
+        drawTexture(matrices, x, y, 0, 0, borderWidth, height - borderWidth); //left border
+        drawTexture(matrices, x, y + height - borderWidth, 0, textureHeight - borderWidth, borderWidth, borderWidth); //bottom left corner
+        drawTexture(matrices, x + borderWidth, y, borderWidth, 0, width - 2 * borderWidth, borderWidthTop); //top border
+        drawTexture(matrices, x + width - borderWidth, y, textureWidth - borderWidth, 0, borderWidth, height - borderWidth); //right border
+        drawTexture(matrices, x + width - borderWidth, y + height - borderWidth, textureWidth - borderWidth, textureHeight - borderWidth, borderWidth, borderWidth); //bottom right corner
+        drawTexture(matrices, x + borderWidth, y + height - borderWidth, borderWidth, textureHeight - borderWidth, width - 2 * borderWidth, borderWidth); //bottom border
+        drawTexture(matrices, x + borderWidth, y + borderWidthTop + (rows - 1) * slotHeight, borderWidth, 125, width - 2 * borderWidth, splitterHeight); //splitter
 
         //Render slots texture
         for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
-                drawTexture(matrices, this.getX() + borderWidth + column * slotHeight, this.getY() + borderWidthTop + row * slotHeight + (row == rows - 1 ? splitterHeight : 0), borderWidth, borderWidthTop, slotHeight, slotHeight);
+                drawTexture(matrices, x + borderWidth + column * slotHeight, y + borderWidthTop + row * slotHeight + (row == rows - 1 ? splitterHeight : 0), borderWidth, borderWidthTop, slotHeight, slotHeight);
             }
         }
 
@@ -87,27 +87,27 @@ public class InventoryWidget extends ClickableWidget {
         int maxNameWidth = this.width - 2 * borderWidth - 2;
         StringVisitable trimmedName = title;
         if (textRenderer.getWidth(title) > maxNameWidth) {
-            trimmedName = StringVisitable.concat(textRenderer.trimToWidth(title, maxNameWidth - textRenderer.getWidth(ScreenTexts.ELLIPSIS)), ScreenTexts.ELLIPSIS);
+            trimmedName = StringVisitable.concat(textRenderer.trimToWidth(title, maxNameWidth - textRenderer.getWidth(new LiteralText("..."))), new LiteralText("..."));
         }
 
-        textRenderer.draw(matrices, trimmedName.getString(), this.getX() + 8, this.getY() + 6, 4210752);
+        textRenderer.draw(matrices, trimmedName.getString(), x + 8, y + 6, 4210752);
 
         for (Slot slot : this.slots) {
             if (slot.isEnabled()) {
-                this.drawSlot(matrices, slot);
+                this.drawSlot(slot);
             }
 
             if (isPointOverSlot(slot, mouseX, mouseY) && slot.isEnabled()) {
                 this.focusedSlot = slot;
-                drawSlotHighlight(matrices, slot.x, slot.y, this.getNavigationOrder());
+                drawSlotHighlight(matrices, slot.x, slot.y, this.getZOffset());
             }
         }
 
         if (!mouseStack.isEmpty()) {
             int x = mouseX - 8;
             int y = mouseY - 8;
-            itemRenderer.renderGuiItemIcon(matrices, mouseStack, x, y);
-            itemRenderer.renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, mouseStack, x, y);
+            itemRenderer.renderGuiItemIcon(mouseStack, x, y);
+            itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, mouseStack, x, y);
         }
     }
 
@@ -118,14 +118,14 @@ public class InventoryWidget extends ClickableWidget {
         return mouseX >= (double) x && mouseX < (double) (x + slotHeight) && mouseY >= (double) y && mouseY < (double) (y + slotHeight);
     }
 
-    private void drawSlot(MatrixStack matrices, Slot slot) {
+    private void drawSlot(Slot slot) {
         ItemStack itemStack = slot.getStack();
-        itemRenderer.renderGuiItemIcon(matrices, itemStack, slot.x, slot.y);
-        itemRenderer.renderGuiItemOverlay(matrices, MinecraftClient.getInstance().textRenderer, itemStack, slot.x, slot.y);
+        itemRenderer.renderGuiItemIcon(itemStack, slot.x, slot.y);
+        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, itemStack, slot.x, slot.y);
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    public void appendNarrations(NarrationMessageBuilder builder) {
 
     }
 

@@ -1,5 +1,5 @@
 modLoader = "javafml" #mandatory
-loaderVersion = "[45,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion = "[40,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license = "GNU LGPL 3.0"
 issueTrackerURL = "https://github.com/Schauweg/Smooth-Swapping/issues"
 
@@ -7,7 +7,7 @@ issueTrackerURL = "https://github.com/Schauweg/Smooth-Swapping/issues"
 modId = "smoothswapping" #mandatory
 version = "${version}" #mandatory
 displayName = "Smooth Swapping" #mandatory
-logoFile = "assets/smoothswapping/icon.png" #optional
+logoFile = "icon.png" #optional
 #credits="Thanks for this example mod goes to Java" #optional
 # A text field displayed in the mod UI
 authors="Schauweg, Riflusso" #optional
@@ -19,7 +19,7 @@ Moves items smoothly in inventories
 [[dependencies.smoothswapping]] #optional
 modId = "forge" #mandatory
 mandatory = true #mandatory
-versionRange = "[45,)" #mandatory
+versionRange = "[40,)" #mandatory
 ordering = "NONE"
 side = "BOTH"
 
@@ -28,7 +28,7 @@ side = "BOTH"
 modId = "minecraft"
 mandatory = true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange = "[1.19.4,)"
+versionRange = "[1.18,)"
 ordering = "NONE"
 side = "BOTH"
 

@@ -1,5 +1,6 @@
 package dev.shwg.smoothswapping.mixin;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import dev.shwg.smoothswapping.ItemStackAccessor;
 import dev.shwg.smoothswapping.SmoothSwapping;
 import dev.shwg.smoothswapping.SwapUtil;
@@ -19,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,27 +37,27 @@ import static dev.shwg.smoothswapping.SwapUtil.swapListIndexOf;
 public abstract class ItemRendererMixin {
 
     @Final
-    @Shadow
-    private MinecraftClient client;
+    @Unique
+    private MinecraftClient smooth_Swapping$client = MinecraftClient.getInstance();
 
     @Unique
     private static boolean smooth_Swapping$isRendering = false;
 
     @Shadow
-    public abstract void renderGuiItemIcon(MatrixStack matrices, ItemStack stack, int x, int y);
-    @Shadow public abstract void renderGuiItemOverlay(MatrixStack matrices, TextRenderer textRenderer, ItemStack stack, int x, int y, @Nullable String countLabel);
+    public abstract void renderGuiItemIcon(ItemStack stack, int x, int y);
+    @Shadow public abstract void renderGuiItemOverlay(TextRenderer textRenderer, ItemStack stack, int x, int y, @Nullable String countLabel);
 
     @Inject(method = "renderGuiItemModel", at = @At("HEAD"), cancellable = true)
-    public void onItemDraw(MatrixStack matrices, ItemStack stack, int x, int y, BakedModel model, CallbackInfo cbi) {
+    public void onItemDraw(ItemStack stack, int x, int y, BakedModel model, CallbackInfo cbi) {
         if (smooth_Swapping$isRendering) return;
 
         try {
             smooth_Swapping$isRendering = true;
 
-            if (smooth_Swapping$isHotbar(matrices) && !(client.currentScreen instanceof ConfigScreen)) return;
+            if (smooth_Swapping$isHotbar() && !(smooth_Swapping$client.currentScreen instanceof ConfigScreen)) return;
             if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
 
-            smooth_Swapping$doSwap(matrices, stack, x, y, cbi);
+            smooth_Swapping$doSwap(stack, x, y, cbi);
         } catch (Exception e) {
             SwapUtil.reset();
         } finally {
@@ -66,7 +66,7 @@ public abstract class ItemRendererMixin {
     }
 
     @Unique
-    private void smooth_Swapping$doSwap(MatrixStack matrices, ItemStack stack, int x, int y, CallbackInfo cbi) throws Error {
+    private void smooth_Swapping$doSwap(ItemStack stack, int x, int y, CallbackInfo cbi) throws Error {
         int index = SwapUtil.getSlotIndex(stack);
 
         if (SmoothSwapping.swaps.containsKey(index)) {
@@ -86,7 +86,7 @@ public abstract class ItemRendererMixin {
                 }
 
                 //LOGGER.info("render i2i swap, stack hash: " + stack.hashCode());
-                smooth_Swapping$renderSwap(matrices, swap, x, y, swap.getSwapItem());
+                smooth_Swapping$renderSwap(swap, x, y, swap.getSwapItem());
 
                 if (SwapUtil.hasArrived(swap)) {
                     SwapUtil.setRenderToTrue(swapList);
@@ -96,7 +96,7 @@ public abstract class ItemRendererMixin {
 
             //whether the destination slot should be rendered
             if (renderDestinationSlot) {
-                renderGuiItemIcon(matrices, stack.copy(), x, y);
+                renderGuiItemIcon(stack.copy(), x, y);
             }
             if (swapList.isEmpty())
                 SmoothSwapping.swaps.remove(index);
@@ -133,7 +133,7 @@ public abstract class ItemRendererMixin {
                                         if (swap.getTargetStackHash() == -1)
                                             swap.setTargetStackHash(stack.hashCode());
                                         //LOGGER.info("i2c insert render on " + stack + " to render " + swap.getSwapItem() + ", hash=" + swap.getSwapItem().hashCode());
-                                        smooth_Swapping$renderSwap(matrices, swap, x, y, copiedStack);
+                                        smooth_Swapping$renderSwap(swap, x, y, copiedStack);
 
                                         if (SwapUtil.hasArrived(swap)) swap.setArrived(true);
                                     }
@@ -153,8 +153,8 @@ public abstract class ItemRendererMixin {
     }
 
     @Unique
-    private void smooth_Swapping$renderSwap(MatrixStack matrices, InventorySwap swap, int x, int y, ItemStack copiedStack) {
-        float lastFrameDuration = client.getLastFrameDuration();
+    private void smooth_Swapping$renderSwap(InventorySwap swap, int x, int y, ItemStack copiedStack) {
+        float lastFrameDuration = smooth_Swapping$client.getLastFrameDuration();
         Config config = ConfigManager.getConfig();
 
         double swapX = swap.getX();
@@ -170,33 +170,36 @@ public abstract class ItemRendererMixin {
         double renderX = -swap.getStartX() - Math.cos(angle) * swap.getDistance() * ease;
         double renderY = swap.getStartY() + Math.sin(angle) * swap.getDistance() * ease;
 
+        MatrixStack matrices = RenderSystem.getModelViewStack();
         matrices.push();
         matrices.translate(renderX, -renderY, 350);
+        RenderSystem.applyModelViewMatrix();
 
-        renderGuiItemIcon(matrices, copiedStack, x, y);
+        renderGuiItemIcon(copiedStack, x, y);
 
         double speed = swap.getDistance() / 10 * config.getAnimationSpeedFormatted();
 
         swap.setX(swapX + lastFrameDuration * speed * Math.cos(angle));
         swap.setY(swapY + lastFrameDuration * speed * Math.sin(angle));
         matrices.pop();
+        RenderSystem.applyModelViewMatrix();
     }
 
-    @Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
-    public void onDrawItemInSlot(MatrixStack matrices, TextRenderer textRenderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo cbi) {
-        if (smooth_Swapping$isHotbar(matrices) && !(client.currentScreen instanceof ConfigScreen)) return;
+    @Inject(method = "renderGuiItemOverlay(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
+    public void onDrawItemInSlot(TextRenderer textRenderer, ItemStack stack, int x, int y, String countLabel, CallbackInfo cbi) {
+        if (smooth_Swapping$isHotbar() && !(smooth_Swapping$client.currentScreen instanceof ConfigScreen)) return;
 
         if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
 
         try {
-            smooth_Swapping$doOverlayRender(matrices, stack, x, y, cbi);
+            smooth_Swapping$doOverlayRender(stack, x, y, cbi);
         } catch (Exception e) {
             SwapUtil.reset();
         }
     }
 
     @Unique
-    private void smooth_Swapping$doOverlayRender(MatrixStack matrices, ItemStack stack, int x, int y, CallbackInfo cbi) throws StackOverflowError {
+    private void smooth_Swapping$doOverlayRender(ItemStack stack, int x, int y, CallbackInfo cbi) throws StackOverflowError {
         int index = SwapUtil.getSlotIndex(stack);
 
         if (SmoothSwapping.swaps.containsKey(index)) {
@@ -231,21 +234,24 @@ public abstract class ItemRendererMixin {
                     double renderX = -swap.getStartX() - (Math.cos(angle) * swap.getDistance() * ease);
                     double renderY = swap.getStartY() + (Math.sin(angle) * swap.getDistance() * ease);
 
+                    MatrixStack matrices = RenderSystem.getModelViewStack();
                     matrices.push();
                     matrices.translate(renderX, -renderY, 350);
+                    RenderSystem.applyModelViewMatrix();
 
                     if (stack.isItemBarVisible())
-                        renderGuiItemOverlay(matrices, client.textRenderer, stack.copy(), x, y, null);
+                        renderGuiItemOverlay(smooth_Swapping$client.textRenderer, stack.copy(), x, y, null);
                     else
-                        renderGuiItemOverlay(matrices, client.textRenderer, stack.copy(), x, y, amount);
+                        renderGuiItemOverlay(smooth_Swapping$client.textRenderer, stack.copy(), x, y, amount);
 
                     matrices.pop();
+                    RenderSystem.applyModelViewMatrix();
                 }
 
             }
 
             if (renderToSlot && stackCount > 1) {
-                renderGuiItemOverlay(matrices, client.textRenderer, stack.copy(), x, y, String.valueOf(stackCount));
+                renderGuiItemOverlay(smooth_Swapping$client.textRenderer, stack.copy(), x, y, String.valueOf(stackCount));
             }
             cbi.cancel();
         }
@@ -253,9 +259,8 @@ public abstract class ItemRendererMixin {
 
 
     @Unique
-    private boolean smooth_Swapping$isHotbar(MatrixStack matrices) {
-        Vector3f zOffset = new Vector3f();
-        matrices.peek().getPositionMatrix().getColumn(3, zOffset);
-        return zOffset.round().x <= 0;
+    private boolean smooth_Swapping$isHotbar() {
+        Matrix4fAccessor matrix = (Matrix4fAccessor) (Object) RenderSystem.getModelViewStack().peek().getPositionMatrix();
+        return matrix.m03() <= 0;
     }
 }
