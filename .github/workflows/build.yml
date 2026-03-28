@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         distribution: [ temurin ]
-        java: [ 21 ]
+        java: [ 25 ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -50,7 +50,7 @@ jobs:
       - name: build
         run: ./gradlew build
       - name: capture fabric build artifacts
-        if: ${{ runner.os == 'Linux' && matrix.java == '21' }}
+        if: ${{ runner.os == 'Linux' && matrix.java == '25' }}
         uses: actions/upload-artifact@v4
         with:
           name: Artifacts-Fabric
