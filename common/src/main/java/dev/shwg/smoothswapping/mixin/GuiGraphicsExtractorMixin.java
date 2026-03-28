@@ -11,7 +11,7 @@ import dev.shwg.smoothswapping.swaps.InventorySwap;
 import dev.shwg.smoothswapping.swaps.ItemToCursorInventorySwap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,8 +33,8 @@ import java.util.List;
 import static dev.shwg.smoothswapping.SmoothSwapping.ASSUME_CURSOR_STACK_SLOT_INDEX;
 import static dev.shwg.smoothswapping.SwapUtil.swapListIndexOf;
 
-@Mixin(GuiGraphics.class)
-public abstract class GuiGraphicsMixin {
+@Mixin(GuiGraphicsExtractor.class)
+public abstract class GuiGraphicsExtractorMixin {
 
     @Final
     @Shadow
@@ -47,12 +47,12 @@ public abstract class GuiGraphicsMixin {
     private static boolean smooth_Swapping$isRendering = false;
 
     @Shadow
-    public abstract void renderItem(ItemStack item, int x, int y);
+    public abstract void item(ItemStack item, int x, int y);
 
     @Shadow
-    public abstract void renderItemDecorations(Font textRenderer, ItemStack stack, int x, int y, @Nullable String countOverride);
+    public abstract void itemDecorations(Font textRenderer, ItemStack stack, int x, int y, @Nullable String countOverride);
 
-    @Inject(method = "renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;III)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "item(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;III)V", at = @At("HEAD"), cancellable = true)
     public void onItemDraw(LivingEntity entity, Level world, ItemStack stack, int x, int y, int seed, CallbackInfo cbi) {
         if (smooth_Swapping$isRendering) return;
 
@@ -101,7 +101,7 @@ public abstract class GuiGraphicsMixin {
 
             //whether the destination slot should be rendered
             if (renderDestinationSlot) {
-                renderItem(stack.copy(), x, y);
+                item(stack.copy(), x, y);
             }
             if (swapList.isEmpty())
                 SmoothSwapping.swaps.remove(index);
@@ -178,7 +178,7 @@ public abstract class GuiGraphicsMixin {
         pose.pushMatrix();
         pose.translate((float) renderX, (float) -renderY);
 
-        renderItem(copiedStack, x, y);
+        item(copiedStack, x, y);
 
         double speed = swap.getDistance() / 10 * config.getAnimationSpeedFormatted();
 
@@ -187,7 +187,7 @@ public abstract class GuiGraphicsMixin {
         pose.popMatrix();
     }
 
-    @Inject(method = "renderItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "itemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
     public void onDrawItemInSlot(Font textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo cbi) {
         if (smooth_Swapping$isHotbar() && !(minecraft.screen instanceof ConfigScreen)) return;
 
@@ -240,9 +240,9 @@ public abstract class GuiGraphicsMixin {
                     pose.translate((float) renderX, (float) -renderY);
 
                     if (stack.isBarVisible())
-                        renderItemDecorations(minecraft.font, stack.copy(), x, y, null);
+                        itemDecorations(minecraft.font, stack.copy(), x, y, null);
                     else
-                        renderItemDecorations(minecraft.font, stack.copy(), x, y, amount);
+                        itemDecorations(minecraft.font, stack.copy(), x, y, amount);
 
                     pose.popMatrix();
                 }
@@ -250,7 +250,7 @@ public abstract class GuiGraphicsMixin {
             }
 
             if (renderToSlot && stackCount > 1) {
-                renderItemDecorations(minecraft.font, stack.copy(), x, y, String.valueOf(stackCount));
+                itemDecorations(minecraft.font, stack.copy(), x, y, String.valueOf(stackCount));
             }
             cbi.cancel();
         }

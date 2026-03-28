@@ -11,7 +11,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.HashedStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,13 +25,13 @@ import java.util.Map;
 @Mixin(ServerboundContainerClickPacket.class)
 public class ServerboundContainerClickPacketMixin {
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void onInit(int syncId, int revision, short slot, byte button, ClickType actionType, Int2ObjectMap<HashedStack> modifiedStacks, HashedStack cursor, CallbackInfo cbi) {
+    public void onInit(int syncId, int revision, short slot, byte button, ContainerInput containerInput, Int2ObjectMap<HashedStack> modifiedStacks, HashedStack cursor, CallbackInfo cbi) {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove((int) slot);
 
-        if ((actionType == ClickType.QUICK_MOVE || actionType == ClickType.SWAP) && modifiedStacks.size() > 1 && Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
+        if ((containerInput == ContainerInput.QUICK_MOVE || containerInput == ContainerInput.SWAP) && modifiedStacks.size() > 1 && Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
             assert Minecraft.getInstance().player != null;
             LocalPlayer player = Minecraft.getInstance().player;
             AbstractContainerMenu screenHandler = player.containerMenu;
@@ -39,7 +39,7 @@ public class ServerboundContainerClickPacketMixin {
             if (slot >= 0 && slot < screenHandler.slots.size()) {
                 Slot mouseHoverSlot = screenHandler.getSlot(slot);
 
-                if (actionType == ClickType.QUICK_MOVE && !mouseHoverSlot.allowModification(player)) {
+                if (containerInput == ContainerInput.QUICK_MOVE && !mouseHoverSlot.allowModification(player)) {
 
                     HashedStack newMouseStackHash = modifiedStacks.get(slot);
                     ItemStack oldMouseStack = smooth_Swapping$getSafeOldStack(slot);
@@ -48,7 +48,7 @@ public class ServerboundContainerClickPacketMixin {
                     if (oldMouseStack != null && newMouseStackHash instanceof HashedStack.ActualItem newMouseStackImpl && (newMouseStackImpl.count() - oldMouseStack.getCount() <= 0)) {
                         SmoothSwapping.clickSwapStack = slot;
                     }
-                } else if (actionType == ClickType.SWAP) {
+                } else if (containerInput == ContainerInput.SWAP) {
                     SmoothSwapping.clickSwap = true;
 
                     for (Map.Entry<Integer, HashedStack> stackEntry : modifiedStacks.int2ObjectEntrySet()) {

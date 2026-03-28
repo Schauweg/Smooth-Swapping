@@ -19,7 +19,7 @@ Moves items smoothly in inventories
 [[dependencies.smoothswapping]] #optional
 modId = "neoforge" #mandatory
 mandatory = true #mandatory
-versionRange = "[21,)" #mandatory
+versionRange = "[26,)" #mandatory
 ordering = "NONE"
 side = "BOTH"
 
@@ -28,7 +28,7 @@ side = "BOTH"
 modId = "minecraft"
 mandatory = true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
-versionRange = "[1.21.11,)"
+versionRange = "[26.1,)"
 ordering = "NONE"
 side = "BOTH"
 

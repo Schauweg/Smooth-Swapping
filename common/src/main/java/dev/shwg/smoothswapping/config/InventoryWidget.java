@@ -4,7 +4,7 @@ import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.mixin.SimpleContainerAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -58,7 +58,7 @@ public class InventoryWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
         //Render Border
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX(), this.getY(), 0, 0, borderWidth, height - borderWidth, 256, 256); //left border
@@ -83,7 +83,7 @@ public class InventoryWidget extends AbstractWidget {
             trimmedName = FormattedText.composite(textRenderer.substrByWidth(title, maxNameWidth - textRenderer.width(CommonComponents.ELLIPSIS)), CommonComponents.ELLIPSIS);
         }
 
-        context.drawString(textRenderer, trimmedName.getString(), this.getX() + 8, this.getY() + 6, 4210752, false);
+        context.text(textRenderer, trimmedName.getString(), this.getX() + 8, this.getY() + 6, 4210752, false);
 
         for (Slot slot : this.slots) {
             if (isPointOverSlot(slot, mouseX, mouseY) && slot.isActive()) {
@@ -101,8 +101,8 @@ public class InventoryWidget extends AbstractWidget {
         if (!mouseStack.isEmpty()) {
             int x = mouseX - 8;
             int y = mouseY - 8;
-            context.renderItem(mouseStack, x, y);
-            context.renderItemDecorations(Minecraft.getInstance().font, mouseStack, x, y);
+            context.item(mouseStack, x, y);
+            context.itemDecorations(Minecraft.getInstance().font, mouseStack, x, y);
         }
     }
 
@@ -113,10 +113,10 @@ public class InventoryWidget extends AbstractWidget {
         return mouseX >= (double) x && mouseX < (double) (x + slotHeight) && mouseY >= (double) y && mouseY < (double) (y + slotHeight);
     }
 
-    private void drawSlot(GuiGraphics context, Slot slot) {
+    private void drawSlot(GuiGraphicsExtractor context, Slot slot) {
         ItemStack itemStack = slot.getItem();
-        context.renderItem(itemStack, slot.x, slot.y);
-        context.renderItemDecorations(Minecraft.getInstance().font, itemStack, slot.x, slot.y);
+        context.item(itemStack, slot.x, slot.y);
+        context.itemDecorations(Minecraft.getInstance().font, itemStack, slot.x, slot.y);
     }
 
     @Override

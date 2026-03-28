@@ -8,7 +8,7 @@
   "client": [
     "AbstractContainerScreenMixin",
     "AbstractRecipeBookScreenMixin",
-    "GuiGraphicsMixin",
+    "GuiGraphicsExtractorMixin",
     "ItemStackMixin",
     "ServerboundContainerClickPacketMixin",
     "SimpleContainerAccessor"

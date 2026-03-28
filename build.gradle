@@ -1,56 +1,110 @@
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.13-SNAPSHOT" apply false
+    id 'dev.architectury.loom-no-remap' version '1.14-SNAPSHOT' apply false
+    id "architectury-plugin" version "3.5-SNAPSHOT"
+    id 'com.gradleup.shadow' version '9.4.+' apply false
     id "me.shedaniel.unified-publishing" version "0.1.+" apply false
 }
 
 architectury {
-    minecraft = rootProject.minecraft_version
-}
-
-repositories {
-    maven {
-        url = "https://api.modrinth.com/maven"
-    }
-    maven {
-        name "neoforgedReleases"
-        url "https://maven.neoforged.net/releases"
-    }
-}
-
-subprojects {
-    apply plugin: "dev.architectury.loom"
-
-    dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-
-        mappings loom.officialMojangMappings()
-    }
+    minecraft = project.minecraft_version
 }
 
 allprojects {
-    apply plugin: "java"
-    apply plugin: "architectury-plugin"
-    apply plugin: "maven-publish"
-
-    archivesBaseName = rootProject.archives_base_name
-    version = rootProject.mod_version
     group = rootProject.maven_group
+    version = rootProject.mod_version
+}
 
-    repositories {
-        // Add repositories to retrieve artifacts from in here.
-        // You should only use this when depending on other mods because
-        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-        // for more information about repositories.
+subprojects {
+    apply plugin: 'dev.architectury.loom-no-remap'
+    apply plugin: 'architectury-plugin'
+
+    base {
+        archivesName = project.archives_base_name
     }
 
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = 21
+    loom {
+        silentMojangMappingsLicense()
+    }
+
+    repositories {
+        maven { url = "https://maven.terraformersmc.com/" }
+        maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Modrinth"
+                    url = "https://api.modrinth.com/maven"
+                }
+            }
+            filter {
+                includeGroup "maven.modrinth"
+            }
+        }
+    }
+
+    dependencies {
+        minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
     }
 
     java {
-        withSourcesJar()
+        targetCompatibility = sourceCompatibility = 25
     }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.release = 25
+    }
+
+    processResources {
+        inputs.property "version", project.version
+
+        filesMatching(["*.mixins.json", "*.mod.json", "META-INF/*mods.toml"]) {
+            expand "version": project.version
+        }
+    }
+
+    apply plugin: 'com.gradleup.shadow'
+
+    configurations {
+        common {
+            canBeResolved = true
+            canBeConsumed = false
+        }
+        compileClasspath.extendsFrom common
+        runtimeClasspath.extendsFrom common
+
+        // Files in this configuration will be bundled into your mod using the Shadow plugin.
+        // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
+        shadowBundle {
+            canBeResolved = true
+            canBeConsumed = false
+        }
+
+        apiElements {
+            outgoing.artifacts.clear()
+            outgoing.artifact(shadowJar)
+        }
+        runtimeElements {
+            outgoing.artifacts.clear()
+            outgoing.artifact(shadowJar)
+        }
+    }
+
+    jar {
+        archiveClassifier = "dev"
+    }
+
+    // see https://gist.github.com/shedaniel/18d4eebf940e9c3296e87d994ebb2838
+    shadowJar {
+        dependsOn(jar)
+        mainSpec.sourcePaths.clear()       // Remove default source set inclusion
+        from(zipTree(jar.archiveFile))     // Unpack jar output (preserves Loom modifications)
+
+        configurations = [project.configurations.shadowBundle]
+        archiveClassifier = "${rootProject.minecraft_version}-${project.name}"
+    }
+
+    apply plugin: 'me.shedaniel.unified-publishing'
 }

@@ -3,7 +3,7 @@ package dev.shwg.smoothswapping.config;
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetTooltipHolder;
@@ -48,7 +48,7 @@ public class CatmullRomWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
         //workaround because overriding mouseMoved doesn't work
         //hide tooltip when mouse is moved again
@@ -64,17 +64,17 @@ public class CatmullRomWidget extends AbstractWidget {
 
         for (int i = 0; i < verticalLines; i++) {
             int stepSize = this.gridWidth / verticalLines;
-            context.vLine(this.getX() + this.borderSize + stepSize + i * stepSize, this.getY() + borderSize, this.getY() + this.borderSize + this.gridHeight, 0x10FFFFFF);
+            context.verticalLine(this.getX() + this.borderSize + stepSize + i * stepSize, this.getY() + borderSize, this.getY() + this.borderSize + this.gridHeight, 0x10FFFFFF);
         }
 
         for (int i = 0; i < horizontalLines; i++) {
             int stepSize = this.gridHeight / horizontalLines;
 
-            context.hLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
+            context.horizontalLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + 1 + i * stepSize, 0x10FFFFFF);
         }
 
-        context.vLine(this.getX() + this.borderSize, this.getY() + this.borderSize, this.getY() + this.borderSize + gridHeight, 0xFFFFFFFF);
-        context.hLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + this.gridHeight, 0xFFFFFFFF);
+        context.verticalLine(this.getX() + this.borderSize, this.getY() + this.borderSize, this.getY() + this.borderSize + gridHeight, 0xFFFFFFFF);
+        context.horizontalLine(this.getX() + this.borderSize, this.getX() + this.borderSize + this.gridWidth, this.getY() + this.borderSize + this.gridHeight, 0xFFFFFFFF);
 
         for (int i = 1; i < points.size() - 2; i++) {
             Vec2 p0 = points.get(i - 1);
@@ -199,7 +199,7 @@ public class CatmullRomWidget extends AbstractWidget {
         return (borderSize - globalY + gridHeight + this.getY() - 1) / gridHeight;
     }
 
-    private void drawPixel(GuiGraphics context, int x, int y, int color) {
+    private void drawPixel(GuiGraphicsExtractor context, int x, int y, int color) {
         context.fill(x, y, x + 1, y + 1, color);
     }
 
@@ -298,7 +298,7 @@ public class CatmullRomWidget extends AbstractWidget {
         }
 
         @Override
-        public void refreshTooltipForNextRenderPass(GuiGraphics context, int mouseX, int mouseY, boolean hovered, boolean focused, ScreenRectangle navigationFocus) {
+        public void refreshTooltipForNextRenderPass(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, boolean focused, ScreenRectangle navigationFocus) {
             if (tooltip == null) {
                 prevShouldRender = false;
                 return;

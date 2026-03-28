@@ -5,11 +5,17 @@ import dev.shwg.smoothswapping.Vec2;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentInitializers;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 
@@ -21,6 +27,7 @@ public class ConfigScreen extends Screen {
     OptionInstance<Integer> animationSpeedOption;
     OptionInstance<Boolean> toggleOption;
     private final int oldAnimationSpeed;
+    private static boolean componentsBound = false;
     Screen parentScreen;
     List<Vec2> oldPoints;
 
@@ -55,6 +62,7 @@ public class ConfigScreen extends Screen {
 
     @Override
     protected void init() {
+        ensureComponentsBound();
         this.addRenderableWidget(toggleOption.createButton(Minecraft.getInstance().options, this.width / 2 - 94, height / 5 - 20, 188));
         this.addRenderableWidget(animationSpeedOption.createButton(Minecraft.getInstance().options, this.width / 2 - 94, this.height / 5 + 5, 188));
         this.catmullRomWidget = new CatmullRomWidget(this.width / 2 - 84 - 10, this.height / 3, 64, 64, 12, 4, 4, config.getCurvePoints());
@@ -78,9 +86,9 @@ public class ConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        context.drawCenteredString(font, title, this.width / 2, 10, 0xFFFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(context, mouseX, mouseY, delta);
+        context.centeredText(font, title, this.width / 2, 10, 0xFFFFFFFF);
         config.setCurvePoints(catmullRomWidget.getPoints());
     }
 
@@ -89,5 +97,26 @@ public class ConfigScreen extends Screen {
         config.setCurvePoints(oldPoints);
         config.setAnimationSpeed(oldAnimationSpeed);
         Minecraft.getInstance().setScreen(parentScreen);
+    }
+
+    //I'm not sure if this safe but it works :D
+    private static synchronized void ensureComponentsBound() {
+        if (componentsBound) return;
+
+        try {
+            new ItemStack(Items.STONE);
+            componentsBound = true;
+            return;
+        } catch (Exception ignored) {
+        }
+
+        try {
+            HolderLookup.Provider lookup = VanillaRegistries.createLookup();
+            var registry = BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(lookup);
+            registry.forEach(DataComponentInitializers.PendingComponents::apply);
+            componentsBound = true;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize DataComponents for config GUI", e);
+        }
     }
 }

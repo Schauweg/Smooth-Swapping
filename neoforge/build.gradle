@@ -1,92 +1,24 @@
-plugins {
-    id "com.github.johnrengelman.shadow" version "8.1.1"
-    id "me.shedaniel.unified-publishing"
-}
 architectury {
     platformSetupLoomIde()
     neoForge()
 }
 
 configurations {
-    common {
-        canBeResolved = true
-        canBeConsumed = false
-    }
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
     developmentNeoForge.extendsFrom common
-
-    // Files in this configuration will be bundled into your mod using the Shadow plugin.
-    // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
-    shadowBundle {
-        canBeResolved = true
-        canBeConsumed = false
-    }
 }
 
 repositories {
     maven {
-        name "neoforgedReleases"
-        url "https://maven.neoforged.net/releases"
+        name = 'NeoForged'
+        url = 'https://maven.neoforged.net/releases'
     }
 }
 
 dependencies {
     neoForge "net.neoforged:neoforge:${project.forge_version}"
 
-    common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
-}
-
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("META-INF/neoforge.mods.toml") {
-        expand "version": project.version
-    }
-}
-
-shadowJar {
-    exclude "fabric.mod.json"
-
-    configurations = [project.configurations.shadowBundle]
-    archiveClassifier = "dev-shadow"
-}
-
-remapJar {
-    inputFile.set shadowJar.archiveFile
-    dependsOn shadowJar
-    archiveClassifier = "${rootProject.minecraft_version}-neoforge"
-}
-
-jar {
-    archiveClassifier = "dev"
-}
-
-sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-}
-
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
-}
-
-publishing {
-    publications {
-        mavenNeoForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-    }
+    common(project(path: ":common")) { transitive false }
+    shadowBundle(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive false }
 }
 
 def CHANGELOG = new File(rootProject.projectDir.getAbsolutePath(), "CHANGELOG.md").text
@@ -99,14 +31,14 @@ unifiedPublishing {
         changelog = CHANGELOG
         gameVersions = SUPPORTED_VERSIONS
         gameLoaders = ["neoforge"]
-        mainPublication tasks.remapJar
+        mainPublication tasks.shadowJar
 
         var CURSE_API_KEY = System.getenv("CURSEFORGE_API_KEY")
         if (CURSE_API_KEY != null) {
             curseforge {
                 token = CURSE_API_KEY
                 id = rootProject.curseforge_id
-                gameVersions.addAll "Java 21"
+                gameVersions = SUPPORTED_VERSIONS
             }
         }
 
