@@ -77,7 +77,7 @@ public abstract class AbstractRecipeBookScreenMixin<T extends RecipeBookMenu> ex
             SmoothSwapping.currentCursorStackLock.unlock();
         }
 
-        Screen screen = client.screen;
+        Screen screen = client.gui.screen();
 
         if (SmoothSwapping.clickSwap) {
             SmoothSwapping.clickSwap = false;

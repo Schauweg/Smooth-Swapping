@@ -76,7 +76,7 @@ public class ConfigScreen extends Screen {
 
         Button saveButton = Button.builder(Component.translatable("smoothswapping.config.save"), button -> {
             ConfigManager.save();
-            Minecraft.getInstance().setScreen(parentScreen);
+            Minecraft.getInstance().gui.setScreen(parentScreen);
         }).bounds(this.width / 2 + 10, this.height - 30, 88, 20).build();
         this.addRenderableWidget(saveButton);
 
@@ -96,7 +96,7 @@ public class ConfigScreen extends Screen {
     public void onClose() {
         config.setCurvePoints(oldPoints);
         config.setAnimationSpeed(oldAnimationSpeed);
-        Minecraft.getInstance().setScreen(parentScreen);
+        Minecraft.getInstance().gui.setScreen(parentScreen);
     }
 
     //I'm not sure if this safe but it works :D

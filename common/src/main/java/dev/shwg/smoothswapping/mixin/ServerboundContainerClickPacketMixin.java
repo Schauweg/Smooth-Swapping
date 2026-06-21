@@ -31,7 +31,7 @@ public class ServerboundContainerClickPacketMixin {
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove((int) slot);
 
-        if ((containerInput == ContainerInput.QUICK_MOVE || containerInput == ContainerInput.SWAP) && modifiedStacks.size() > 1 && Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
+        if ((containerInput == ContainerInput.QUICK_MOVE || containerInput == ContainerInput.SWAP) && modifiedStacks.size() > 1 && Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen) {
             assert Minecraft.getInstance().player != null;
             LocalPlayer player = Minecraft.getInstance().player;
             AbstractContainerMenu screenHandler = player.containerMenu;

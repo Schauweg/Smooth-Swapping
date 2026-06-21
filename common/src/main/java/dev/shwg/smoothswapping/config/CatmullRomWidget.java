@@ -313,7 +313,7 @@ public class CatmullRomWidget extends AbstractWidget {
             }
 
             if (shouldRender && Util.getMillis() - renderCheckTime > delay.toMillis()) {
-                Screen screen = Minecraft.getInstance().screen;
+                Screen screen = Minecraft.getInstance().gui.screen();
                 if (screen != null) {
                     context.setTooltipForNextFrame(minecraftClient.font, this.tooltip.toCharSequence(minecraftClient), new CMRTooltipPosition(widget), mouseX, mouseY, focused);
                 }

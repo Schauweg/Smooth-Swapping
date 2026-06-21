@@ -59,7 +59,7 @@ public abstract class GuiGraphicsExtractorMixin {
         try {
             smooth_Swapping$isRendering = true;
 
-            if (smooth_Swapping$isHotbar() && !(minecraft.screen instanceof ConfigScreen)) return;
+            if (smooth_Swapping$isHotbar() && !(minecraft.gui.screen() instanceof ConfigScreen)) return;
             if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
 
             smooth_Swapping$doSwap(stack, x, y, cbi);
@@ -189,7 +189,7 @@ public abstract class GuiGraphicsExtractorMixin {
 
     @Inject(method = "itemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V", at = @At("HEAD"), cancellable = true)
     public void onDrawItemInSlot(Font textRenderer, ItemStack stack, int x, int y, String countOverride, CallbackInfo cbi) {
-        if (smooth_Swapping$isHotbar() && !(minecraft.screen instanceof ConfigScreen)) return;
+        if (smooth_Swapping$isHotbar() && !(minecraft.gui.screen() instanceof ConfigScreen)) return;
 
         if (((ItemStackAccessor) (Object) stack).smooth_Swapping$isSwapStack()) return;
 
