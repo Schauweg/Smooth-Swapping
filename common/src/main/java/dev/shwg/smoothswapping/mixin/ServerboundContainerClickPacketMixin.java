@@ -31,6 +31,7 @@ public class ServerboundContainerClickPacketMixin {
     public void onInit(int syncId, int revision, short slot, byte button, ContainerInput containerInput, Int2ObjectMap<HashedStack> modifiedStacks, HashedStack cursor, CallbackInfo cbi) {
         if (!ConfigManager.getConfig().getToggleMod())
             return;
+        SmoothSwapping.lastContainerClickTime = System.currentTimeMillis();
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove((int) slot);
 

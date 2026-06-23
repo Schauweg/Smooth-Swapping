@@ -8,7 +8,8 @@ import java.util.List;
 public class CompatibilityRegistry {
     private static final ScreenCompatibilityAdapter DEFAULT_ADAPTER = new VanillaLikeScreenAdapter();
     private static final List<ScreenCompatibilityAdapter> ADAPTERS = List.of(
-            new MacawsFurnitureAdapter()
+            new MacawsFurnitureAdapter(),
+            new TravelersBackpackAdapter()
     );
 
     public static ScreenCompatibilityAdapter getAdapter(Screen screen, AbstractContainerMenu menu) {

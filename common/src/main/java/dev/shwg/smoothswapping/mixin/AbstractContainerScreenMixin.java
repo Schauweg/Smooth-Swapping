@@ -107,7 +107,7 @@ public abstract class AbstractContainerScreenMixin {
         }
 
         Map<Integer, ItemStack> changedStacks = smooth_Swapping$getChangedStacks(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks);
-        if (!SmoothSwapping.clickSwap) {
+        if (!SmoothSwapping.clickSwap && adapter.shouldAnimateChangedStacks(menu, changedStacks)) {
             int changedStacksSize = changedStacks.size();
             if (changedStacksSize > 1) {
                 List<SwapStacks> moreStacks = new ArrayList<>();
