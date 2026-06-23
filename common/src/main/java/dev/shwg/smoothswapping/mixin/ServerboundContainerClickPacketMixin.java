@@ -2,9 +2,12 @@ package dev.shwg.smoothswapping.mixin;
 
 import dev.shwg.smoothswapping.SmoothSwapping;
 import dev.shwg.smoothswapping.SwapUtil;
+import dev.shwg.smoothswapping.compat.CompatibilityRegistry;
+import dev.shwg.smoothswapping.compat.ScreenCompatibilityAdapter;
 import dev.shwg.smoothswapping.config.ConfigManager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.NonNullList;
@@ -31,15 +34,21 @@ public class ServerboundContainerClickPacketMixin {
         //remove swap when stack gets moved before it arrived
         SmoothSwapping.swaps.remove((int) slot);
 
-        if ((containerInput == ContainerInput.QUICK_MOVE || containerInput == ContainerInput.SWAP) && modifiedStacks.size() > 1 && Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
+        Screen screen = Minecraft.getInstance().screen;
+        if ((containerInput == ContainerInput.QUICK_MOVE || containerInput == ContainerInput.SWAP) && modifiedStacks.size() > 1 && screen instanceof AbstractContainerScreen) {
             assert Minecraft.getInstance().player != null;
             LocalPlayer player = Minecraft.getInstance().player;
             AbstractContainerMenu screenHandler = player.containerMenu;
+            ScreenCompatibilityAdapter adapter = CompatibilityRegistry.getAdapter(screen, screenHandler);
 
-            if (slot >= 0 && slot < screenHandler.slots.size()) {
+            if (!adapter.shouldHandle(screen, screenHandler)) {
+                return;
+            }
+
+            if (adapter.isRealItemSlot(screenHandler, slot)) {
                 Slot mouseHoverSlot = screenHandler.getSlot(slot);
 
-                if (containerInput == ContainerInput.QUICK_MOVE && !mouseHoverSlot.allowModification(player)) {
+                if (containerInput == ContainerInput.QUICK_MOVE && !adapter.canAnimateStackChange(screenHandler, slot, player)) {
 
                     HashedStack newMouseStackHash = modifiedStacks.get(slot);
                     ItemStack oldMouseStack = smooth_Swapping$getSafeOldStack(slot);
@@ -54,16 +63,16 @@ public class ServerboundContainerClickPacketMixin {
                     for (Map.Entry<Integer, HashedStack> stackEntry : modifiedStacks.int2ObjectEntrySet()) {
                         int destinationSlotID = stackEntry.getKey();
 
-                        if (destinationSlotID >= 0 && destinationSlotID < screenHandler.slots.size() && destinationSlotID != slot) {
+                        if (adapter.isRealItemSlot(screenHandler, destinationSlotID) && destinationSlotID != slot) {
                             Slot destinationSlot = screenHandler.getSlot(destinationSlotID);
 
                             ItemStack destinationOldStack = smooth_Swapping$getSafeOldStack(destinationSlotID);
 
-                            if (!mouseHoverSlot.allowModification(player) && destinationSlot.allowModification(player)) {
+                            if (!adapter.canAnimateStackChange(screenHandler, slot, player) && adapter.canAnimateStackChange(screenHandler, destinationSlotID, player)) {
                                 if (destinationOldStack.isEmpty()) {
                                     SwapUtil.addI2IInventorySwap(destinationSlotID, mouseHoverSlot, destinationSlot, false, destinationSlot.getItem().getCount());
                                 }
-                            } else if (mouseHoverSlot.allowModification(player) && destinationSlot.allowModification(player)) {
+                            } else if (adapter.canAnimateStackChange(screenHandler, slot, player) && adapter.canAnimateStackChange(screenHandler, destinationSlotID, player)) {
                                 if (destinationSlot.hasItem()) {
                                     SwapUtil.addI2IInventorySwap(destinationSlotID, mouseHoverSlot, destinationSlot, false, destinationSlot.getItem().getCount());
                                 }
