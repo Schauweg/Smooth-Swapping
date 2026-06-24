@@ -47,8 +47,9 @@ Class names:
 Assessment:
 
 - The NeoForge/Forge class names differ from Fabric.
-- `MacawsFurnitureAdapter` now includes both the Fabric class pair and the NeoForge/Forge class pair.
-- The adapter still uses vanilla-like slot behavior and has no hard dependency on Macaw's Furniture.
+- The default `macaws_furniture` configurable entry includes both the Fabric class pair and the
+  NeoForge/Forge class pair.
+- The entry uses vanilla-like slot behavior and has no hard dependency on Macaw's Furniture.
 
 ### MrCrayfish's Refurbished Furniture
 
@@ -132,12 +133,12 @@ NeoForge class names checked:
 Assessment:
 
 - The NeoForge branch keeps the same screen/menu/main storage slot class names used by the Fabric
-  adapter.
-- `TravelersBackpackAdapter` intentionally animates only visible main backpack storage slots and
-  vanilla player inventory slots.
+  configurable entry.
+- The default `travelers_backpack` entry intentionally animates only visible main backpack storage
+  slots and vanilla player inventory slots.
 - Tool slots, upgrade slots, lockable upgrade slots, fluid slots, filter/fake slots, disabled slots,
-  and upgrade crafting/result slots are not treated as real item slots by the adapter.
-- The adapter also limits animations to a recent normal container click and at most 12 changed slots,
+  and upgrade crafting/result slots are not listed as real item slots by the entry.
+- The entry also limits animations to a recent normal container click and at most 12 changed slots,
   so bulk actions are conservative.
 
 ## Forge conclusion
@@ -157,7 +158,7 @@ NeoForge should theoretically reuse the Fabric-tested compatibility logic becaus
 - the mixin targets are Minecraft client/container classes shared by the two enabled platforms;
 - no Fabric-only APIs are referenced from common code;
 - Macaw's NeoForge class names are now covered;
-- Traveler's Backpack NeoForge class names match the existing adapter;
+- Traveler's Backpack NeoForge class names match the default configurable entry;
 - Refurbished Furniture uses vanilla-like screens and menus covered by the default adapter.
 
 Manual NeoForge testing is still needed because slot mutation timing and target mod loader code can

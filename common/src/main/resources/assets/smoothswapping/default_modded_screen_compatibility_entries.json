@@ -1,0 +1,80 @@
+[
+  {
+    "id": "macaws_furniture",
+    "enabled": true,
+    "screen_classes": [
+      "net.kikoz.mcwfurnitures.storage.FurnitureScreen",
+      "com.mcwfurnitures.kikoz.storage.FurnitureStorageScreeen"
+    ],
+    "menu_classes": [
+      "net.kikoz.mcwfurnitures.storage.FurnitureScreenHandler",
+      "com.mcwfurnitures.kikoz.storage.FurnitureStorageContainer"
+    ],
+    "slot_policy": "vanilla_like",
+    "item_slot_classes": [],
+    "include_player_inventory_slots": false,
+    "player_inventory_slot_classes": [],
+    "click_animation_window_ms": -1,
+    "max_changed_slots": -1
+  },
+  {
+    "id": "refurbished_furniture",
+    "enabled": true,
+    "screen_classes": [
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.ComputerScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.DoorMatScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.ElectricityContainerScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.ElectricityGeneratorScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.PostBoxScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.RecyclingBinScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.WorkbenchScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.FreezerScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.MicrowaveScreen",
+      "com.mrcrayfish.furniture.refurbished.client.gui.screen.StoveScreen",
+      "com.mrcrayfish.furniture.refurbished.client.screen.FabricFreezerScreen",
+      "com.mrcrayfish.furniture.refurbished.client.screen.FabricMicrowaveScreen",
+      "com.mrcrayfish.furniture.refurbished.client.screen.FabricStoveScreen"
+    ],
+    "menu_classes": [
+      "com.mrcrayfish.furniture.refurbished.inventory.ComputerMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.DoorMatMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.ElectricityGeneratorMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.FreezerMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.MicrowaveMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.PostBoxMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.RecycleBinMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.StoveMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.WorkbenchMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.FabricFreezerMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.FabricMicrowaveMenu",
+      "com.mrcrayfish.furniture.refurbished.inventory.FabricStoveMenu"
+    ],
+    "slot_policy": "vanilla_like",
+    "item_slot_classes": [],
+    "include_player_inventory_slots": false,
+    "player_inventory_slot_classes": [],
+    "click_animation_window_ms": -1,
+    "max_changed_slots": -1
+  },
+  {
+    "id": "travelers_backpack",
+    "enabled": true,
+    "screen_classes": [
+      "com.tiviacz.travelersbackpack.client.screens.BackpackScreen"
+    ],
+    "menu_classes": [
+      "com.tiviacz.travelersbackpack.inventory.menu.BackpackItemMenu",
+      "com.tiviacz.travelersbackpack.inventory.menu.BackpackBlockEntityMenu"
+    ],
+    "slot_policy": "configured_item_slots",
+    "item_slot_classes": [
+      "com.tiviacz.travelersbackpack.inventory.menu.slot.BackpackSlotItemHandler"
+    ],
+    "include_player_inventory_slots": true,
+    "player_inventory_slot_classes": [
+      "net.minecraft.world.inventory.Slot"
+    ],
+    "click_animation_window_ms": 1000,
+    "max_changed_slots": 12
+  }
+]
