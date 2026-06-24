@@ -4,6 +4,8 @@ import dev.shwg.smoothswapping.SmoothSwapping;
 import dev.shwg.smoothswapping.SwapStacks;
 import dev.shwg.smoothswapping.SwapUtil;
 import dev.shwg.smoothswapping.Vec2;
+import dev.shwg.smoothswapping.compat.CompatibilityRegistry;
+import dev.shwg.smoothswapping.compat.ScreenCompatibilityAdapter;
 import dev.shwg.smoothswapping.config.ConfigManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -43,7 +45,7 @@ public abstract class AbstractContainerScreenMixin {
     @Unique
     private Screen smooth_Swapping$currentScreen = null;
 
-    @Inject(method = "extractRenderState", at = @At("HEAD"))
+    @Inject(method = "extractContents", at = @At("HEAD"))
     public void onRender(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         try {
             smooth_Swapping$doRender(mouseX, mouseY);
@@ -86,6 +88,10 @@ public abstract class AbstractContainerScreenMixin {
         }
 
         Screen screen = client.screen;
+        ScreenCompatibilityAdapter adapter = CompatibilityRegistry.getAdapter(screen, menu);
+        if (!adapter.shouldHandle(screen, menu)) {
+            return;
+        }
 
         if (SmoothSwapping.clickSwap) {
             SmoothSwapping.clickSwap = false;
@@ -101,7 +107,7 @@ public abstract class AbstractContainerScreenMixin {
         }
 
         Map<Integer, ItemStack> changedStacks = smooth_Swapping$getChangedStacks(SmoothSwapping.oldStacks, SmoothSwapping.currentStacks);
-        if (!SmoothSwapping.clickSwap) {
+        if (!SmoothSwapping.clickSwap && adapter.shouldAnimateChangedStacks(menu, changedStacks)) {
             int changedStacksSize = changedStacks.size();
             if (changedStacksSize > 1) {
                 List<SwapStacks> moreStacks = new ArrayList<>();
@@ -115,20 +121,23 @@ public abstract class AbstractContainerScreenMixin {
 
                     //whether the stack got more items or less and if slot is output slot
                     if (getCount(newStack) > getCount(oldStack)
-                            && menu.getSlot(slotID).allowModification(Minecraft.getInstance().player)) {
+                            && adapter.canAnimateStackChange(menu, slotID, Minecraft.getInstance().player)) {
                         moreStacks.add(new SwapStacks(slotID, oldStack, newStack, getCount(oldStack) - getCount(newStack)));
                         totalAmount += getCount(newStack) - getCount(oldStack);
                     } else if (getCount(newStack) < getCount(oldStack)
-                            && menu.getSlot(slotID).allowModification(Minecraft.getInstance().player)
+                            && adapter.canAnimateStackChange(menu, slotID, Minecraft.getInstance().player)
                             && SmoothSwapping.clickSwapStack == null) {
                         lessStacks.add(new SwapStacks(slotID, oldStack, newStack, getCount(oldStack) - getCount(newStack)));
                     }
                 }
                 if (SmoothSwapping.clickSwapStack != null) {
                     lessStacks.clear();
-                    ItemStack newStack = menu.getSlot(SmoothSwapping.clickSwapStack).getItem();
-                    ItemStack oldStack = SmoothSwapping.oldStacks.get(SmoothSwapping.clickSwapStack);
-                    lessStacks.add(new SwapStacks(SmoothSwapping.clickSwapStack, oldStack, newStack, totalAmount));
+                    int clickSwapSlot = SmoothSwapping.clickSwapStack;
+                    if (adapter.isRealItemSlot(menu, clickSwapSlot)) {
+                        ItemStack newStack = menu.getSlot(clickSwapSlot).getItem();
+                        ItemStack oldStack = SmoothSwapping.oldStacks.get(clickSwapSlot);
+                        lessStacks.add(new SwapStacks(clickSwapSlot, oldStack, newStack, totalAmount));
+                    }
                     SmoothSwapping.clickSwapStack = null;
                 }
                 if (moreStacks.isEmpty()) {
@@ -146,6 +155,9 @@ public abstract class AbstractContainerScreenMixin {
                                 && currentCursorStack.getCount() != oldCursorStack.getCount()
                 ) {
                     changedStacks.entrySet().stream().findFirst().ifPresent(changedStack -> {
+                        if (!adapter.isRealItemSlot(menu, changedStack.getKey())) {
+                            return;
+                        }
                         ItemStack oldStack = SmoothSwapping.oldStacks.get(changedStack.getKey());
                         ItemStack currentStack = SmoothSwapping.currentStacks.get(changedStack.getKey());
                         int cursorStackCountDiff = currentCursorStack.getCount() - SmoothSwapping.oldCursorStack.getCount();

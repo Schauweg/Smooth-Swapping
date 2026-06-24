@@ -23,6 +23,7 @@ public class SmoothSwapping {
     public static final int ASSUME_CURSOR_STACK_SLOT_INDEX = -2;
     public static boolean clickSwap;
     public static Short clickSwapStack;
+    public static long lastContainerClickTime;
     public static Map<Integer, List<InventorySwap>> swaps;
     public static NonNullList<ItemStack> oldStacks, currentStacks;
     public static ItemStack oldCursorStack;
