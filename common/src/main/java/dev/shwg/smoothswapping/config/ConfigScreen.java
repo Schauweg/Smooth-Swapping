@@ -111,7 +111,7 @@ public class ConfigScreen extends Screen {
         }
 
         try {
-            HolderLookup.Provider lookup = VanillaRegistries.createLookup();
+            HolderLookup.Provider lookup = VanillaRegistries.createWorldLookup();
             var registry = BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(lookup);
             registry.forEach(DataComponentInitializers.PendingComponents::apply);
             componentsBound = true;

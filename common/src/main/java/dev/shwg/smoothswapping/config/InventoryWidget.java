@@ -126,7 +126,7 @@ public class InventoryWidget extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (click.button() == 0) {
+        if (click.button() == 1) {
             if (isPointOverSlot(focusedSlot, click.x(), click.y())) {
                 if (click.hasShiftDown()) {
                     //Focused Slot is in last row

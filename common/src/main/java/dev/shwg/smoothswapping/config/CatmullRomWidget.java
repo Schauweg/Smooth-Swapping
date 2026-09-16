@@ -109,7 +109,7 @@ public class CatmullRomWidget extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (click.button() == 1) {
+        if (click.button() == 3) {
             if (hoveredPointIndex != null) {
                 this.points.remove((int) hoveredPointIndex);
             } else if (isMouseInGrid(click.x(), click.y())) {

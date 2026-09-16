@@ -23,7 +23,7 @@
     "smoothswapping-common.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.14.21",
-    "minecraft": ">=26.2"
+    "fabricloader": ">=0.19.5",
+    "minecraft": ">=26.3"
   }
 }
