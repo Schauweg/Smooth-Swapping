@@ -21,6 +21,7 @@ dependencies {
 
 def CHANGELOG = new File(rootProject.projectDir.getAbsolutePath(), "CHANGELOG.md").text
 def SUPPORTED_VERSIONS = Arrays.asList(project.supported_versions.split(','))
+def SUPPORTED_ENVIRONMENTS = Arrays.asList(project.supported_environments.split(','))
 
 unifiedPublishing {
     project {
@@ -46,7 +47,7 @@ unifiedPublishing {
             curseforge {
                 token = CURSE_API_KEY
                 id = rootProject.curseforge_id
-                gameVersions = SUPPORTED_VERSIONS
+                gameVersions = SUPPORTED_VERSIONS + SUPPORTED_ENVIRONMENTS
             }
         }
 
