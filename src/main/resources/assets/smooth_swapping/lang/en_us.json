@@ -1,0 +1,21 @@
+{
+  "smooth_swapping.config.title": "Smooth Swapping Config",
+  "smooth_swapping.config.enabled": "Mod Enabled",
+  "smooth_swapping.config.animation.mode": "Animation Mode",
+  "smooth_swapping.config.animation.mode.tooltip.line": "Animation Mode Options",
+  "smooth_swapping.config.animation.mode.tooltip.fixed_duration": "Swaps always take the same amount of time to arrive",
+  "smooth_swapping.config.animation.mode.tooltip.fixed_speed": "all Swaps move at a constant speed",
+  "smooth_swapping.config.animation.speed": "Animation speed",
+  "smooth_swapping.config.animate_cursor_clicks": "Animate cursor clicks",
+  "smooth_swapping.config.animate_cursor_clicks.tooltip": "Animate picking up and putting down items with the cursor. Collecting with a double-click is always animated",
+
+
+
+
+
+
+  "smooth_swapping.option.fixed_duration": "Fixed Duration",
+  "smooth_swapping.option.fixed_speed": "Fixed Speed",
+  "smooth_swapping.option.short.fixed_duration": "Duration",
+  "smooth_swapping.option.short.fixed_speed": "Speed"
+}

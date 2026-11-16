@@ -1,0 +1,6 @@
+version:100
+fov:0.5
+onboardAccessibility:false
+darkMojangStudiosBackground:true
+soundCategory_master:0.3
+soundCategory_music:0.0

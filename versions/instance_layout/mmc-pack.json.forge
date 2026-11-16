@@ -1,0 +1,13 @@
+{
+    "components": [
+        {
+            "uid": "net.minecraft",
+            "version": "${minecraft_version}"
+        },
+        {
+            "uid": "net.minecraftforge",
+            "version": "${forge_version}"
+        }
+    ],
+    "formatVersion": 1
+}

@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "dev.shwg.smoothswapping.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8.5",
+  "client": [
+    "AbstractContainerScreenAccessor",
+    "AbstractContainerScreenMixin",
+    "GameRendererMixin",
+    "GraphicsMixin",
+    "compat.sophisticatedcore.StorageScreenBaseMixin",
+    "compat.sophisticatedcore.StorageContainerMenuBaseMixin"
+  ],
+  "plugin": "dev.shwg.smoothswapping.mixin.SmoothSwappingMixinPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
