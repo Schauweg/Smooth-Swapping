@@ -44,7 +44,6 @@ public class InventoryWidget extends GenericAbstractWidget {
     private static final int SPLITTER_HEIGHT = 14;
     private static final int SPLITTER_TEXTURE_V = 125;
     private static final int HOVER_COLOR = 0x80FFFFFF;
-    // Lifts flying items above the slots (ignored from 1.21.6, where draw order decides)
     private static final float FLYING_Z = 100;
 
     private final int columns;
@@ -117,7 +116,6 @@ public class InventoryWidget extends GenericAbstractWidget {
             WidgetSlot slot = slots.get(i);
             graphics.blit(CONTAINER_TEXTURE, getSlotX(i) - 1, getSlotY(i) - 1, BORDER_WIDTH, BORDER_WIDTH_TOP, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
 
-            // only what was already there before the swaps flying into this slot
             ItemStack stack = slot.getItem();
             int ownCount = stack.getCount() - inFlight(slotSwaps.get(slot));
             if (ownCount > 0) {
@@ -131,7 +129,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         }
     }
 
-    // after all slots, so flying items are drawn on top of every slot
     private void renderSlotSwaps(GenericGraphics graphics) {
         slotSwaps.forEach((slot, swaps) -> {
             for (Swap swap : swaps) {
@@ -334,7 +331,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         mouseStack = previous;
     }
 
-    // A normal right click while holding items: one item into the slot, or a trade if it's a different item
     private void rightClickSlotWithCursor(WidgetSlot slot) {
         ItemStack slotStack = slot.getItem();
 
@@ -401,7 +397,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         second.set(firstStack);
     }
 
-    // A drag over 2+ slots keeps its distribution, anything less was just a click on the slot
     private void releaseDrag(DragState drag, double mouseX, double mouseY, Consumer<WidgetSlot> click) {
         if (drag.slots.size() > 1) {
             endDrag(drag, false);
@@ -536,7 +531,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         addSlotToCursorSwap(from, moved);
     }
 
-    // No setting check: the double-click collect is always animated, like in-game
     private void addSlotToCursorSwap(WidgetSlot from, ItemStack moved) {
         if (moved.isEmpty()) return;
         Swap swap = Swap.of(SwapPoint.slot(from.getContainerSlot()), SwapPoint.CURSOR, moved,
@@ -555,7 +549,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         return SmoothSwapping.CONFIG.animateCursorClicks.getValue();
     }
 
-    // a slot that loses items: whatever was still flying into it lands instantly
     private void finishSwapsTo(WidgetSlot slot) {
         slotSwaps.remove(slot);
     }
@@ -579,12 +572,9 @@ public class InventoryWidget extends GenericAbstractWidget {
         return amount;
     }
 
-    // monotonic milliseconds, independent of SwapManager's in-game frame time
     private static long now() {
         return System.nanoTime() / 1_000_000L;
     }
-
-    // --- Layout
 
     private WidgetSlot getSlotAt(double mouseX, double mouseY) {
         for (WidgetSlot slot : slots) {
@@ -639,7 +629,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         clearSwaps();
     }
 
-    // swaps store absolute start positions, which are wrong once the widget moves
     private void clearSwaps() {
         slotSwaps.clear();
         cursorSwaps.clear();
@@ -735,8 +724,7 @@ public class InventoryWidget extends GenericAbstractWidget {
         }
 
         public Builder addItem(Item item, int slot) {
-            items.put(slot, DisplayItemStack.getStackSimple(item, 1));
-            return self();
+            return addItem(item, 1, slot);
         }
 
         @Override
