@@ -87,6 +87,9 @@ public class CatmullRomWidget extends GenericAbstractWidget {
 
     @Override
     protected boolean onMouseClicked(GenericMouseButtonEvent event) {
+        if(isMouseOverHelp(event.getMouseX(), event.getMouseY())) {
+            return true;
+        }
         if (event.isRightClick()) {
             if (hoveredPointIndex != null) {
                 points.remove((int) hoveredPointIndex);
@@ -161,9 +164,9 @@ public class CatmullRomWidget extends GenericAbstractWidget {
         return getY() + 1;
     }
 
-    private boolean isMouseOverHelp(int mouseX, int mouseY) {
-        return isVisible() && mouseX >= helpX() && mouseX <= helpX() + HELP_ICON.regionWidth()
-                && mouseY >= helpY() && mouseY <= helpY() + HELP_ICON.regionHeight();
+    private boolean isMouseOverHelp(double mouseX, double mouseY) {
+        return isVisible() && mouseX >= helpX() && mouseX < helpX() + HELP_ICON.regionWidth()
+                && mouseY >= helpY() && mouseY < helpY() + HELP_ICON.regionHeight();
     }
 
     private boolean isMouseInGrid(double mouseX, double mouseY) {
