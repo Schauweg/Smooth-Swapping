@@ -7,6 +7,7 @@ import dev.shwg.shwgconfig.gui.input.events.GenericMouseButtonEvent;
 import dev.shwg.shwgconfig.render.GenericGraphics;
 import dev.shwg.shwgconfig.render.textures.GenericTexture;
 import dev.shwg.shwgconfig.util.DisplayItemStack;
+import dev.shwg.smoothswapping.SmoothSwapping;
 import dev.shwg.smoothswapping.swap.Swap;
 import dev.shwg.smoothswapping.swap.SwapPoint;
 import dev.shwg.smoothswapping.util.ItemStackUtil;
@@ -20,6 +21,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class InventoryWidget extends GenericAbstractWidget {
 
@@ -243,25 +246,14 @@ public class InventoryWidget extends GenericAbstractWidget {
     protected boolean onMouseReleased(GenericMouseButtonEvent event) {
         lastMouseX = (int) event.getMouseX();
         lastMouseY = (int) event.getMouseY();
+
         if (leftDrag.active) {
-            if (leftDrag.slots.size() > 1) {
-                // Real drag: keep the distribution (the preview already showed it, no swaps)
-                endDrag(leftDrag, false);
-            } else {
-                // Plain click: undo the preview and run the normal click logic instead
-                WidgetSlot clicked = leftDrag.slots.isEmpty()
-                        ? getSlotAt(event.getMouseX(), event.getMouseY())
-                        : leftDrag.slots.get(0);
-                endDrag(leftDrag, true);
-                if (clicked != null) {
-                    clickSlotWithCursor(clicked);
-                }
-            }
+            releaseDrag(leftDrag, event.getMouseX(), event.getMouseY(), this::clickSlotWithCursor);
             return true;
         }
 
         if (rightDrag.active) {
-            endDrag(rightDrag, false);
+            releaseDrag(rightDrag, event.getMouseX(), event.getMouseY(), this::rightClickSlotWithCursor);
             return true;
         }
 
@@ -285,10 +277,8 @@ public class InventoryWidget extends GenericAbstractWidget {
     }
 
     private void handleRightClick(WidgetSlot slot) {
-        ItemStack slotStack = slot.getItem();
-
         if (mouseStack.isEmpty()) {
-            // Pick up half the stack and be ready to drag-distribute it right away
+            ItemStack slotStack = slot.getItem();
             if (slotStack.isEmpty()) return;
 
             finishSwapsTo(slot);
@@ -296,21 +286,11 @@ public class InventoryWidget extends GenericAbstractWidget {
             mouseStack = remaining.split((slotStack.getCount() + 1) / 2);
             slot.set(remaining);
             animateSlotToCursor(slot, mouseStack);
-            startDrag(rightDrag);
-            rightDrag.suppressedSlot = slot;
             return;
         }
 
-        // Holding items: the drag only stays armed if the first slot accepted an item
         startDrag(rightDrag);
-        if (!tryAddSlotToDrag(rightDrag, slot)) {
-            endDrag(rightDrag, false);
-
-            // Different item in the slot: swap, like vanilla
-            if (!slotStack.isEmpty() && !ItemStack.isSameItem(mouseStack, slotStack)) {
-                clickSlotWithCursor(slot);
-            }
-        }
+        tryAddSlotToDrag(rightDrag, slot);
     }
 
     private void clickSlotWithCursor(WidgetSlot slot) {
@@ -324,7 +304,7 @@ public class InventoryWidget extends GenericAbstractWidget {
             return;
         }
 
-        if (ItemStack.isSameItem(mouseStack, slotStack)) {
+        if (ItemStackUtil.isSameType(mouseStack, slotStack)) {
             int max = maxStackFor(slot, slotStack);
             int total = slotStack.getCount() + mouseStack.getCount();
             int moved = Math.min(total, max) - slotStack.getCount();
@@ -354,6 +334,29 @@ public class InventoryWidget extends GenericAbstractWidget {
         mouseStack = previous;
     }
 
+    // A normal right click while holding items: one item into the slot, or a trade if it's a different item
+    private void rightClickSlotWithCursor(WidgetSlot slot) {
+        ItemStack slotStack = slot.getItem();
+
+        // different item: trade places, same as a left click
+        if (!slotStack.isEmpty() && !ItemStackUtil.isSameType(mouseStack, slotStack)) {
+            clickSlotWithCursor(slot);
+            return;
+        }
+
+        // same item, but the slot is full
+        if (slotStack.getCount() >= maxStackFor(slot, mouseStack)) return;
+
+        // empty or same item with room: one item moves from the cursor into the slot
+        animateCursorToSlot(slot, ItemStackUtil.copyWithCount(mouseStack, 1));
+        slot.set(ItemStackUtil.copyWithCount(mouseStack, slotStack.getCount() + 1));
+        mouseStack.shrink(1);
+
+        if (mouseStack.isEmpty()) {
+            finishCursorSwaps();
+        }
+    }
+
     private void collectMatchingItemsToCursor() {
         if (mouseStack.isEmpty()) return;
 
@@ -363,7 +366,7 @@ public class InventoryWidget extends GenericAbstractWidget {
         List<WidgetSlot> matching = new ArrayList<>();
         for (WidgetSlot slot : slots) {
             ItemStack stack = slot.getItem();
-            if (!stack.isEmpty() && ItemStack.isSameItem(mouseStack, stack)) {
+            if (!stack.isEmpty() && ItemStackUtil.isSameType(mouseStack, stack)) {
                 matching.add(slot);
             }
         }
@@ -378,7 +381,7 @@ public class InventoryWidget extends GenericAbstractWidget {
             int amount = Math.min(maxCount - mouseStack.getCount(), remaining.getCount());
 
             finishSwapsTo(slot);
-            animateSlotToCursor(slot, ItemStackUtil.copyWithCount(remaining, amount));
+            addSlotToCursorSwap(slot, ItemStackUtil.copyWithCount(remaining, amount));
             mouseStack.grow(amount);
             remaining.shrink(amount);
             slot.set(remaining.isEmpty() ? ItemStack.EMPTY : remaining);
@@ -398,6 +401,22 @@ public class InventoryWidget extends GenericAbstractWidget {
         second.set(firstStack);
     }
 
+    // A drag over 2+ slots keeps its distribution, anything less was just a click on the slot
+    private void releaseDrag(DragState drag, double mouseX, double mouseY, Consumer<WidgetSlot> click) {
+        if (drag.slots.size() > 1) {
+            endDrag(drag, false);
+            return;
+        }
+
+        WidgetSlot clicked = drag.slots.isEmpty()
+                ? getSlotAt(mouseX, mouseY)
+                : drag.slots.get(0);
+        endDrag(drag, false);
+        if (clicked != null) {
+            click.accept(clicked);
+        }
+    }
+
     private void startDrag(DragState drag) {
         drag.reset();
         drag.active = true;
@@ -415,9 +434,6 @@ public class InventoryWidget extends GenericAbstractWidget {
     }
 
     private void dragOver(DragState drag, WidgetSlot hovered) {
-        if (hovered == drag.suppressedSlot) return;
-
-        drag.suppressedSlot = null; // the pointer left the pickup slot, it is a normal target again
         if (hovered != null) {
             tryAddSlotToDrag(drag, hovered);
         }
@@ -430,7 +446,7 @@ public class InventoryWidget extends GenericAbstractWidget {
         if (drag.slots.size() >= drag.startStack.getCount()) return false;
 
         ItemStack current = slot.getItem();
-        if (!current.isEmpty() && !ItemStack.isSameItem(drag.startStack, current)) return false;
+        if (!current.isEmpty() && !ItemStackUtil.isSameType(drag.startStack, current)) return false;
         if (current.getCount() >= maxStackFor(slot, drag.startStack)) return false;
 
         drag.slots.add(slot);
@@ -440,9 +456,9 @@ public class InventoryWidget extends GenericAbstractWidget {
     }
 
     private void redistribute(DragState drag) {
-        int perSlot = drag.oneItemPerSlot
-                ? 1
-                : drag.startStack.getCount() / drag.slots.size();
+        if (drag.slots.size() < 2) return;
+
+        int perSlot = drag.oneItemPerSlot ? 1 : drag.startStack.getCount() / drag.slots.size();
         int used = 0;
 
         for (WidgetSlot slot : drag.slots) {
@@ -493,7 +509,7 @@ public class InventoryWidget extends GenericAbstractWidget {
 
         if (intoEmpty) {
             if (!target.isEmpty()) return;
-        } else if (target.isEmpty() || !ItemStack.isSameItem(source, target)) {
+        } else if (target.isEmpty() || !ItemStackUtil.isSameType(source, target)) {
             return;
         }
 
@@ -508,8 +524,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         source.shrink(amount);
     }
 
-    // --- Preview swaps
-
     private void animateSlotToSlot(WidgetSlot from, WidgetSlot to, ItemStack moved) {
         if (moved.isEmpty() || from == to) return;
         Swap swap = Swap.of(SwapPoint.slot(from.getContainerSlot()), SwapPoint.slot(to.getContainerSlot()), moved,
@@ -518,6 +532,12 @@ public class InventoryWidget extends GenericAbstractWidget {
     }
 
     private void animateSlotToCursor(WidgetSlot from, ItemStack moved) {
+        if (!animateCursorClicks()) return;
+        addSlotToCursorSwap(from, moved);
+    }
+
+    // No setting check: the double-click collect is always animated, like in-game
+    private void addSlotToCursorSwap(WidgetSlot from, ItemStack moved) {
         if (moved.isEmpty()) return;
         Swap swap = Swap.of(SwapPoint.slot(from.getContainerSlot()), SwapPoint.CURSOR, moved,
                 from.x, from.y, lastMouseX - 8, lastMouseY - 8, frameTime);
@@ -525,10 +545,14 @@ public class InventoryWidget extends GenericAbstractWidget {
     }
 
     private void animateCursorToSlot(WidgetSlot to, ItemStack moved) {
-        if (moved.isEmpty()) return;
+        if (moved.isEmpty() || !animateCursorClicks()) return;
         Swap swap = Swap.of(SwapPoint.CURSOR, SwapPoint.slot(to.getContainerSlot()), moved,
                 lastMouseX - 8, lastMouseY - 8, to.x, to.y, frameTime);
         slotSwaps.computeIfAbsent(to, s -> new ArrayList<>()).add(swap);
+    }
+
+    private static boolean animateCursorClicks() {
+        return SmoothSwapping.CONFIG.animateCursorClicks.getValue();
     }
 
     // a slot that loses items: whatever was still flying into it lands instantly
@@ -629,8 +653,6 @@ public class InventoryWidget extends GenericAbstractWidget {
         private ItemStack startStack = ItemStack.EMPTY;
         private boolean active;
 
-        private WidgetSlot suppressedSlot;
-
         private DragState(boolean oneItemPerSlot) {
             this.oneItemPerSlot = oneItemPerSlot;
         }
@@ -640,7 +662,6 @@ public class InventoryWidget extends GenericAbstractWidget {
             slots.clear();
             originalStacks.clear();
             startStack = ItemStack.EMPTY;
-            suppressedSlot = null;
         }
     }
 
