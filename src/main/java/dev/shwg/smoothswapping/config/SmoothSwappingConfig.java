@@ -73,7 +73,7 @@ public class SmoothSwappingConfig extends ConfigBase {
                                         .build()))
                 .build();
 
-        ConfigCategory customWidgetLayout = CategoryBuilder.create(Component.literal("Custom Widget, Own Width + Centered"))
+        ConfigCategory customWidgetLayout = CategoryBuilder.create(Component.translatable("smooth_swapping.config.easing"))
                 .addCustomWidget(new CatmullRomWidget(0, 0, 100, 100, 2, 4, 4, animationCurve.getValue(), animationCurve::setValue))
                 .preview(InventoryWidget.builder(Component.translatable("container.inventory"))
                         .size(4, 3)
