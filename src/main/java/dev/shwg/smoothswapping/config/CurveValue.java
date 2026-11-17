@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CurveValue extends ConfigValue<List<Vec2>> implements CustomJsonSerializable {
@@ -27,6 +28,10 @@ public class CurveValue extends ConfigValue<List<Vec2>> implements CustomJsonSer
         full.addAll(defaultPoints);
         full.add(Vec2.ONE);
         return new CurveValue(full);
+    }
+
+    public static CurveValue of(Vec2... points) {
+        return of(Arrays.asList(points));
     }
 
     public static CurveValue empty() {

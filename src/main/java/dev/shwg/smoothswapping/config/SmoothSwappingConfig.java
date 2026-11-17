@@ -14,8 +14,8 @@ import dev.shwg.smoothswapping.config.widgets.InventoryWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec2;
 
 import java.util.Locale;
 import java.util.function.Function;
@@ -29,7 +29,7 @@ public class SmoothSwappingConfig extends ConfigBase {
     public final EnumValue<Options.AnimationMode> animationMode = EnumValue.of(Options.AnimationMode.FIXED_DURATION);
     public final IntValue animationSpeed = IntValue.of(100, 10, 1000, 5);
     public final BooleanValue animateCursorClicks = BooleanValue.of(true);
-    public final CurveValue animationCurve = CurveValue.empty();
+    public final CurveValue animationCurve = CurveValue.of(new Vec2(0.40f, 0.15f), new Vec2(0.60f, 0.85f));
 
     @Override
     public ConfigManager.ScreenManager buildScreen() {
