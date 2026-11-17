@@ -8,12 +8,12 @@
   "smooth_swapping.config.animation.speed": "Animation speed",
   "smooth_swapping.config.animate_cursor_clicks": "Animate cursor clicks",
   "smooth_swapping.config.animate_cursor_clicks.tooltip": "Animate picking up and putting down items with the cursor. Collecting with a double-click is always animated",
-
-
-
-
-
-
+  "smooth_swapping.config.easing": "Animation Easing",
+  "smooth_swapping.config.curve.help": "Shape of the animation over time",
+  "smooth_swapping.config.curve.help.add": "Right-click an empty spot to add a point",
+  "smooth_swapping.config.curve.help.move": "Drag a point to move it with left click",
+  "smooth_swapping.config.curve.help.remove": "Right-click a point to remove it",
+  "smooth_swapping.config.curve.help.info": "The first and last point can't be moved or deleted",
   "smooth_swapping.option.fixed_duration": "Fixed Duration",
   "smooth_swapping.option.fixed_speed": "Fixed Speed",
   "smooth_swapping.option.short.fixed_duration": "Duration",

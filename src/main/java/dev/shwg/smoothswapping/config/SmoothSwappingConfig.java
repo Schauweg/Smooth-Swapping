@@ -73,8 +73,18 @@ public class SmoothSwappingConfig extends ConfigBase {
                                         .build()))
                 .build();
 
+        CatmullRomWidget catmullRomWidget = new CatmullRomWidget(0, 0, 100, 100, 2, 4, 4, animationCurve.getValue(), animationCurve::setValue);
+        catmullRomWidget.setTooltip(GenericTooltip.builder()
+                .line(Component.translatable("smooth_swapping.config.curve.help"))
+                .bullet(Component.translatable("smooth_swapping.config.curve.help.add"))
+                .bullet(Component.translatable("smooth_swapping.config.curve.help.move"))
+                .bullet(Component.translatable("smooth_swapping.config.curve.help.remove"))
+                .emptyLine()
+                .line(Component.translatable("smooth_swapping.config.curve.help.info"))
+                .build());
+
         ConfigCategory customWidgetLayout = CategoryBuilder.create(Component.translatable("smooth_swapping.config.easing"))
-                .addCustomWidget(new CatmullRomWidget(0, 0, 100, 100, 2, 4, 4, animationCurve.getValue(), animationCurve::setValue))
+                .addCustomWidget(catmullRomWidget)
                 .preview(InventoryWidget.builder(Component.translatable("container.inventory"))
                         .size(4, 3)
                         .addItem(Items.COBBLESTONE, 64, 0)

@@ -4,6 +4,8 @@ package dev.shwg.smoothswapping.config.widgets;
 import dev.shwg.shwgconfig.gui.components.widget.GenericAbstractWidget;
 import dev.shwg.shwgconfig.gui.input.events.GenericMouseButtonEvent;
 import dev.shwg.shwgconfig.render.GenericGraphics;
+import dev.shwg.shwgconfig.render.textures.GenericTexture;
+import dev.shwg.smoothswapping.SmoothSwapping;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec2;
@@ -16,6 +18,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CatmullRomWidget extends GenericAbstractWidget {
+
+    private static final GenericTexture HELP_ICON = GenericTexture.customTexture(SmoothSwapping.MOD_ID, "textures/help.png", 7,7);
+    private static final int POINT_SIZE = 4;
 
     private List<Vec2> points;
     private Integer hoveredPointIndex = null;
@@ -70,10 +75,12 @@ public class CatmullRomWidget extends GenericAbstractWidget {
             int xC = (int) (getX() + borderSize + (point.x * gridWidth)) + 1;
             int yC = (int) (getY() + borderSize + gridHeight + -point.y * gridHeight) - 1;
             int color = (hoveredPointIndex != null && points.get(hoveredPointIndex).equals(point)) ? 0xFFFFFF00 : 0xFFC908FF;
-            graphics.fillWH(xC - 2, yC - 2, 4, 4, color);
+            graphics.fillWH(xC - POINT_SIZE / 2, yC - POINT_SIZE / 2, POINT_SIZE, POINT_SIZE, color);
         }
 
-        if (isHovered()) {
+        graphics.drawTexture(HELP_ICON, helpX(), helpY());
+
+        if (isMouseOverHelp(mouseX, mouseY)) {
             renderDeferredTooltip(graphics, mouseX, mouseY);
         }
     }
@@ -146,6 +153,19 @@ public class CatmullRomWidget extends GenericAbstractWidget {
         return (borderSize - globalY + gridHeight + getY() - 1) / gridHeight;
     }
 
+    private int helpX() {
+        return getX() + 1;
+    }
+
+    private int helpY() {
+        return getY() + 1;
+    }
+
+    private boolean isMouseOverHelp(int mouseX, int mouseY) {
+        return isVisible() && mouseX >= helpX() && mouseX <= helpX() + HELP_ICON.regionWidth()
+                && mouseY >= helpY() && mouseY <= helpY() + HELP_ICON.regionHeight();
+    }
+
     private boolean isMouseInGrid(double mouseX, double mouseY) {
         return isVisible() && mouseX > getX() + borderSize + 1 && mouseX < getX() + borderSize + gridWidth - 1
                 && mouseY > getY() + borderSize + 1 && mouseY < getY() + borderSize + gridHeight - 1;
@@ -158,13 +178,12 @@ public class CatmullRomWidget extends GenericAbstractWidget {
 
     @Nullable
     private Integer hoveredPointIndex(double mouseX, double mouseY) {
-        int pointWidth = 4;
         if (!isMouseOver(mouseX, mouseY)) return null;
         for (int i = 1; i < points.size() - 1; i++) {
             Vec2 point = points.get(i);
             int xC = (int) (getX() + borderSize + point.x * gridWidth) - 1;
-            int yC = (int) (getY() + borderSize + gridHeight - point.y * gridHeight) - pointWidth;
-            if (mouseX >= xC && mouseX < xC + pointWidth && mouseY >= yC && mouseY < yC + pointWidth) {
+            int yC = (int) (getY() + borderSize + gridHeight - point.y * gridHeight) - POINT_SIZE;
+            if (mouseX >= xC && mouseX <= xC + POINT_SIZE && mouseY >= yC && mouseY <= yC + POINT_SIZE) {
                 return i;
             }
         }
