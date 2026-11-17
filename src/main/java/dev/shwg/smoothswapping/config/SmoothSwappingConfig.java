@@ -29,7 +29,7 @@ public class SmoothSwappingConfig extends ConfigBase {
     public final EnumValue<Options.AnimationMode> animationMode = EnumValue.of(Options.AnimationMode.FIXED_DURATION);
     public final IntValue animationSpeed = IntValue.of(100, 10, 1000, 5);
     public final BooleanValue animateCursorClicks = BooleanValue.of(true);
-    public final CurveValue animationCurve = CurveValue.of(new Vec2(0.40f, 0.15f), new Vec2(0.60f, 0.85f));
+    public final CurveValue animationCurve = CurveValue.of(new Vec2(0.38f, 0.11f), new Vec2(0.62f, 0.83f));
 
     @Override
     public ConfigManager.ScreenManager buildScreen() {
